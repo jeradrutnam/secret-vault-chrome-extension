@@ -1,3 +1,5 @@
 declare interface Window {
-    secureHTTP: (arg) => void;
+    secureHTTP: {
+        get: (apiEndpoint) => void;
+    }
 }
