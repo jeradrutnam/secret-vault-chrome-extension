@@ -7,6 +7,7 @@ module.exports = {
     entry: {
         content: './src/app/content.ts',
         background: './src/app/background.ts',
+        inject: './src/app/inject.ts',
         popup: './src/ui/popup.tsx',
     },
 

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Testing</title>
+</head>
+<body>
+    <h1>Hello World!</h1>
+    <button id="mybutton">click me</button>
+    <script>
+        var checkReady = setInterval(() => {
+            if (document.readyState === "complete") {
+                clearInterval(checkReady);
+                secureHTTP("API Request!");
+            }
+        })
+    </script>
+</body>
+</html>
