@@ -16,4 +16,4 @@ window.addEventListener("message", (e) => {
           window.postMessage({ type: "FROM_SERVER", response })
       });
   }
-});
+}, true);

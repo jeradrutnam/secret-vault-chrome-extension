@@ -36,4 +36,4 @@ window.addEventListener("message", (e) => {
             });
         }
     }
-});
+}, true);
