@@ -1,7 +1,7 @@
 {
     "name": "Secret Vault Chrome Extension",
     "version": "0.0.1",
-    "manifest_version": 3,
+    "manifest_version": 2,
     "description": "Extension to store access token during OpenID Connect authentication flows",
     "homepage_url": "https://jeradrutnam.com",
     "icons": {
@@ -10,25 +10,21 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "action": {
+    "browser_action": {
       "default_title": "Token Vault",
       "default_popup": "popup.html"
     },
     "default_locale": "en",
     "background": {
-      "service_worker": "js/background.js"
+      "scripts": [ "js/background.js" ]
     },
-    "host_permissions": [
-      "*://*/*"
-    ],
     "permissions": [
       "activeTab",
-      "tabs"
+      "tabs",
+      "http://192.168.1.7:3000/*",
+      "http://localhost:3000/*"
     ],
-    "web_accessible_resources": [{ 
-      "resources": [ "js/inject.js" ],
-      "matches": [ "http://*/*" ]
-    }],
+    "web_accessible_resources": [ "js/inject.js" ],
     "content_scripts": [
       {
         "matches": [

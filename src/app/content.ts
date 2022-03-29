@@ -8,7 +8,7 @@ const injectScript = (file_path, tag) => {
     node.appendChild(script);
 };
 
-injectScript(chrome.extension.getURL("js/inject.js"), "head");
+injectScript(chrome.runtime.getURL("js/inject.js"), "head");
 
 window.addEventListener("message", (e) => {
   if (e.data.type && e.data.type == "FROM_PAGE") {
