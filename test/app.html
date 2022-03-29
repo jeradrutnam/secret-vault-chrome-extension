@@ -22,6 +22,12 @@
                 }, (error) => {
                     console.error(error);
                 });
+
+                secureHTTP.get("https://api.publicapis.org/entries").then((response) => {
+                    console.log(response);
+                }, (error) => {
+                    console.error(error);
+                });
             }
         })
     </script>
