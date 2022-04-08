@@ -1,10 +1,21 @@
-chrome.tabs.onActivated.addListener(tab => {
-    chrome.tabs.get(tab.tabId, current_tab_info => {
-        if(/^http:\/\/localhost:3000/.test(current_tab_info.url)) {
-            chrome.tabs.executeScript(null, { file: "./js/content.js" }, () => { console.log("Script injected!") })
-        }
-    })
-})
+const getCurrentTab = async () => {
+    let queryOptions = { active: true, currentWindow: true };
+    let [tab] = await chrome.tabs.query(queryOptions);
+
+    return tab;
+};
+
+let tab = await getCurrentTab();
+
+chrome.tabs.onActivated.addListener(() => {
+    if (/^http:\/\/localhost:3000/.test(tab.url)) {
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: [ "./js/content.js" ]
+        });
+    }
+});
+
 
 const mockAPIEndpoint1 = () => {
     return '{ "userID": "UUID3345526888", "userName": "John Does" }';
@@ -50,3 +61,5 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     return true;
 });
+
+export {};

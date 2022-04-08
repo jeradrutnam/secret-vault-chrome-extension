@@ -17,3 +17,5 @@ window.addEventListener("message", (e) => {
       });
   }
 }, true);
+
+export {};
