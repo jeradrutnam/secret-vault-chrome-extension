@@ -1,7 +1,11 @@
 let httpCallStack = [];
 
-const resolveHTTPResponse = (resolve, message) => {
-    resolve(message);
+const resolvePromise = (resolve, responseMessage) => {
+    resolve(responseMessage);
+};
+
+const rejectPromise = (reject, errorMessage) => {
+    reject(errorMessage);
 };
 
 const uniqueIDGen = () => {
@@ -31,7 +35,7 @@ window.addEventListener("message", (e) => {
 
         if (httpRequests.length > 0) {
             httpRequests.forEach((httpRequest) => {
-                resolveHTTPResponse(httpRequest.resolve, e.data.response.message);
+                resolvePromise(httpRequest.resolve, e.data.response.message);
                 httpCallStack.splice(httpCallStack.findIndex(({ instanceID }) => instanceID == httpRequest.instanceID), 1);
             });
         }
