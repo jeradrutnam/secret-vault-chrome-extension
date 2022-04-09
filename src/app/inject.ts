@@ -35,7 +35,13 @@ window.addEventListener("message", (e) => {
 
         if (httpRequests.length > 0) {
             httpRequests.forEach((httpRequest) => {
-                resolvePromise(httpRequest.resolve, e.data.response.message);
+                if (e.data.response.status === "success") {
+                    resolvePromise(httpRequest.resolve, e.data.response.message);
+                }
+                else {
+                    rejectPromise(httpRequest.reject, e.data.response.message);
+                }
+                
                 httpCallStack.splice(httpCallStack.findIndex(({ instanceID }) => instanceID == httpRequest.instanceID), 1);
             });
         }

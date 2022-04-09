@@ -6,7 +6,7 @@
 <body>
     <h1>Hello World!</h1>
     <button id="mybutton">click me</button>
-    <script>
+    <script type="text/javascript">
         var checkReady = setInterval(() => {
             if (document.readyState === "complete") {
                 clearInterval(checkReady);
@@ -17,7 +17,7 @@
                     console.error(error);
                 });
     
-                secureHTTP.get("http://api.webservice.com/getApp").then((response) => {
+                secureHTTP.get("https://api.coindesk.com/v1/bpi/currentprice.json").then((response) => {
                     console.log(response);
                 }, (error) => {
                     console.error(error);
@@ -29,7 +29,7 @@
                     console.error(error);
                 });
             }
-        })
+        });
     </script>
 </body>
 </html>

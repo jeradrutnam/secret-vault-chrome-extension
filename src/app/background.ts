@@ -16,15 +16,6 @@ chrome.tabs.onActivated.addListener(() => {
     }
 });
 
-
-const mockAPIEndpoint1 = () => {
-    return '{ "userID": "UUID3345526888", "userName": "John Does" }';
-}
-
-const mockAPIEndpoint2 = () => {
-    return '{ "appName": "APP789660031", "appName": "My React App" }';
-}
-
 const responseStatus = (response) => {
     if (response.status >= 200 && response.status < 300) {
         return Promise.resolve(response)
@@ -37,27 +28,32 @@ const json = (response) => {
     return response.json()
 }
 
+const isValidResponse = (value) => {
+    if (value == typeof(String)) {
+        try {
+            JSON.parse(value);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.url == "http://api.webservice.com/getUser") {
-        sendResponse({ message: mockAPIEndpoint1(), originalRequestURL: request.url, instanceID: request.instanceID });
-    }
-
-    if (request.url == "http://api.webservice.com/getApp") {
-        setTimeout(() => {
-            sendResponse({ message: mockAPIEndpoint2(), originalRequestURL: request.url, instanceID: request.instanceID });
-        }, 500);
-    }
-
-    if (request.url == "https://api.publicapis.org/entries") {
-        fetch("https://api.publicapis.org/entries")
-            .then(responseStatus)
-            .then(json)
-            .then((data) => {
+    fetch(request.url)
+        .then(responseStatus)
+        .then(json)
+        .then((data) => {
+            if (isValidResponse(data)) {
                 sendResponse({ status: "success", message: data, originalRequestURL: request.url, instanceID: request.instanceID });
-            }).catch((error) => {
-                sendResponse({ status: "failed", message: error, originalRequestURL: request.url, instanceID: request.instanceID });
-            });
-    }
+            }
+            else {
+                sendResponse({ status: "failed", message: "Response is not a valid JSON object or string", originalRequestURL: request.url, instanceID: request.instanceID });
+            }
+        }).catch(() => {
+            sendResponse({ status: "failed", message: "Cannot reach the endpoint", originalRequestURL: request.url, instanceID: request.instanceID });
+        });
 
     return true;
 });
