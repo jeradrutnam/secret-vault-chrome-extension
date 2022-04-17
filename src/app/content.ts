@@ -36,9 +36,9 @@ injectScript(chrome.runtime.getURL("js/inject.js"), "head");
 
 window.addEventListener("message", (e) => {
   if (e.data.origin && e.data.origin == "FROM_PAGE") {
-      chrome.runtime.sendMessage({ url: e.data.url, httpRequestInstanceID: e.data.httpRequestInstanceID }, (response) => {
-          window.postMessage({ origin: "FROM_SERVER", response })
-      });
+        chrome.runtime.sendMessage({ type: e.data.type, body: e.data.body }, (response) => {
+            window.postMessage({ origin: "FROM_SERVER", response });
+        });
   }
 }, true);
 

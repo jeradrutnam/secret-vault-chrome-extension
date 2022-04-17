@@ -23,7 +23,10 @@
 **/
 
 export interface ConfigInterface {
-    discoveryEndpoint: string;
+    clientID: string;
+    discoveryEndpointURL: string;
+    logoutSuccessRedirectURL: string;
+    loginSuccessRedirectURL: string;
 }
 
 export interface secureVaultInstanceInterface {
@@ -33,13 +36,20 @@ export interface secureVaultInstanceInterface {
     initialize(config: ConfigInterface): Promise<boolean>;
 }
 
-const INIT = "init";
-const LOGIN = "login";
-const LOGOUT = "logout";
-const API_CALL = "httpRequest";
+export const MessageTypes = {
+    INIT: "init",
+    LOGIN: "login",
+    LOGOUT: "logout",
+    API_CALL: "httpRequest"
+}
+
+export const MessageStatuses = {
+    SUCCESS: "success",
+    FAILED: "failed"
+}
 
 export type MessageType =
-    | typeof INIT
-    | typeof LOGIN
-    | typeof LOGOUT
-    | typeof API_CALL;
+    | typeof MessageTypes.INIT
+    | typeof MessageTypes.LOGIN
+    | typeof MessageTypes.LOGOUT
+    | typeof MessageTypes.API_CALL;

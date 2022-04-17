@@ -22,7 +22,7 @@
  * SOFTWARE.
 **/
 
-import { secureVaultInstanceInterface, ConfigInterface, MessageType } from "./models";
+import { ConfigInterface, MessageStatuses, MessageTypes } from "./models";
 
 const uniqueIDGen = () => {
     return "UUID" + Math.floor(Math.random() * 100) + Date.now();
@@ -37,8 +37,14 @@ const rejectPromise = (reject, errorMessage) => {
 };
 
 export class vaultClient {
-    private _authConfig: ConfigInterface;
     private static _instance: vaultClient;
+    private static _isInitialized = false;
+    private _authConfig: ConfigInterface;
+    private static _init = { 
+        ["isInitialized"]: false,
+        ["resolve"]: null,
+        ["reject"]: null
+    };
     private _httpCallStack = [];
 
     private constructor() {}
@@ -47,8 +53,8 @@ export class vaultClient {
         return this._httpCallStack;
     }
 
-    private addToHTTPCallStack = (apiRequst) => {
-        return this._httpCallStack.push(apiRequst);
+    private addToHTTPCallStack = (apiRequest) => {
+        return this._httpCallStack.push(apiRequest);
     }
 
     public static getInstance = () => {
@@ -62,44 +68,43 @@ export class vaultClient {
     }
 
     public static initialize = (config: ConfigInterface) => {
+		this.getInstance()._authConfig = config;
+
+        return new Promise((resolve, reject) => {
+            window.postMessage({
+                origin: "FROM_PAGE",
+                type: MessageTypes.INIT,
+                body: {
+                    config: this.getInstance()._authConfig
+                }
+            });
+        });
+    }
+
+    public static isInitialized = () => {
+		return this._init.isInitialized;
+    }
+
+    public static signIn = (callback?) => {
 		// TODO: Implement operation
     }
 
-    public static signIn = () => {
+    public static signOut = (callback?) => {
 		// TODO: Implement operation
-    }
-
-    public static signOut = () => {
-		// TODO: Implement operation
-    }
-
-    public static handleMessage = (message) => {
-        if (message.data.origin && message.data.origin == "FROM_SERVER") {
-        
-            const httpRequests = this.getInstance().getHTTPCallStack().filter(
-                httpRequest => httpRequest.httpRequestInstanceID === message.data.response.httpRequestInstanceID);
-    
-            if (httpRequests.length > 0) {
-                httpRequests.forEach((httpRequest) => {
-                    if (message.data.response.status === "success") {
-                        resolvePromise(httpRequest.resolve, message.data.response.message);
-                    }
-                    else {
-                        rejectPromise(httpRequest.reject, message.data.response.message);
-                    }
-                    
-                    this.getInstance().getHTTPCallStack().splice(this.getInstance().getHTTPCallStack().findIndex(
-                        ({ httpRequestInstanceID }) => httpRequestInstanceID == httpRequest.httpRequestInstanceID), 1);
-                });
-            }
-        }
     }
 
     public static httpRequest = (url) => {
         const httpRequestInstanceID = uniqueIDGen();
         
         return new Promise((resolve, reject) => {
-            window.postMessage({ origin: "FROM_PAGE", type: "httpRequest", url: url, httpRequestInstanceID: httpRequestInstanceID });
+            window.postMessage({ 
+                origin: "FROM_PAGE", 
+                type: MessageTypes.API_CALL,
+                body: {
+                    url: url, 
+                    httpRequestInstanceID: httpRequestInstanceID
+                }
+            });
 
             this.getInstance().addToHTTPCallStack({ 
                 ["httpRequestInstanceID"]: httpRequestInstanceID,
@@ -107,5 +112,46 @@ export class vaultClient {
                 ["reject"]: reject
             });
         });
+    }
+
+    public static handleMessage = (message) => {
+        if (message.data.origin && message.data.origin == "FROM_SERVER") {
+
+            switch(message.data.response.originalRequest.type) {
+                case MessageTypes.INIT:
+                    if (message.data.response.status === MessageStatuses.SUCCESS) {
+                        this._init.isInitialized = true;
+                    } 
+                    else {
+                        console.error("Secure Vault Initialize failed!");
+                    }
+
+                    break;
+                case MessageTypes.API_CALL:
+                    const httpRequests = this.getInstance().getHTTPCallStack().filter(httpRequest => 
+                        httpRequest.httpRequestInstanceID === 
+                            message.data.response.originalRequest.body.httpRequestInstanceID);
+            
+                    if (httpRequests.length > 0) {
+                        httpRequests.forEach((httpRequest) => {
+                            if (message.data.response.status === MessageStatuses.SUCCESS) {
+                                resolvePromise(httpRequest.resolve, message.data.response.message);
+                            }
+                            else {
+                                rejectPromise(httpRequest.reject, message.data.response.message);
+                            }
+                            
+                            this.getInstance().getHTTPCallStack().splice(this.getInstance().getHTTPCallStack()
+                                .findIndex(({ httpRequestInstanceID }) => 
+                                    httpRequestInstanceID == httpRequest.httpRequestInstanceID), 1);
+                        });
+                    }
+
+                    break;
+                default:
+                    return
+                    // code block
+            }
+        }
     }
 }

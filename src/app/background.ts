@@ -22,6 +22,8 @@
  * SOFTWARE.
 **/
 
+import { MessageStatuses, MessageTypes } from "../utils/open-id-connect/models";
+
 const getCurrentTab = async () => {
     let queryOptions = { active: true, currentWindow: true };
     let [tab] = await chrome.tabs.query(queryOptions);
@@ -30,15 +32,6 @@ const getCurrentTab = async () => {
 };
 
 let tab = await getCurrentTab();
-
-chrome.tabs.onActivated.addListener(() => {
-    if (/^http:\/\/localhost:3000/.test(tab.url)) {
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: [ "./js/content.js" ]
-        });
-    }
-});
 
 const responseStatus = (response) => {
     if (response.status >= 200 && response.status < 300) {
@@ -64,20 +57,60 @@ const isValidResponse = (value) => {
     return true;
 };
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    fetch(request.url)
-        .then(responseStatus)
-        .then(json)
-        .then((data) => {
-            if (isValidResponse(data)) {
-                sendResponse({ status: "success", message: data, originalRequestURL: request.url, httpRequestInstanceID: request.httpRequestInstanceID });
-            }
-            else {
-                sendResponse({ status: "failed", message: "Response is not a valid JSON object or string", originalRequestURL: request.url, httpRequestInstanceID: request.httpRequestInstanceID });
-            }
-        }).catch(() => {
-            sendResponse({ status: "failed", message: "Cannot reach the endpoint", originalRequestURL: request.url, httpRequestInstanceID: request.httpRequestInstanceID });
+chrome.tabs.onActivated.addListener(() => {
+    if (/^http:\/\/localhost:3000/.test(tab.url)) {
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: [ "./js/content.js" ]
         });
+    }
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    switch(request.type) {
+        case MessageTypes.INIT:
+            sendResponse({
+                status: MessageStatuses.FAILED,
+                message: "Need to implement",
+                originalRequest: request
+            });
+
+            break;
+        case MessageTypes.API_CALL:
+            fetch(request.body.url)
+                .then(responseStatus)
+                .then(json)
+                .then((data) => {
+                    if (isValidResponse(data)) {
+                        sendResponse({
+                            status: MessageStatuses.SUCCESS,
+                            message: data,
+                            originalRequest: request
+                        });
+                    }
+                    else {
+                        sendResponse({
+                            status: MessageStatuses.FAILED,
+                            message: "Response is not a valid JSON object or string",
+                            originalRequest: request
+                        });
+                    }
+                }).catch(() => {
+                    sendResponse({
+                        status: MessageStatuses.FAILED,
+                        message: "Cannot reach the endpoint",
+                        originalRequest: request
+                    });
+                });
+
+            break;
+        default:
+            sendResponse({
+                status: MessageStatuses.FAILED,
+                message: "invalid request type",
+                originalRequest: request
+            });
+    }
 
     return true;
 });
