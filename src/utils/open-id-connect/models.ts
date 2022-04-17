@@ -22,24 +22,24 @@
  * SOFTWARE.
 **/
 
-const injectScript = (file_path, tag) => {
-    const node = document.getElementsByTagName(tag)[0];
-    const script = document.createElement("script");
+export interface ConfigInterface {
+    discoveryEndpoint: string;
+}
 
-    script.setAttribute("type", "text/javascript");
-    script.setAttribute("src", file_path);
+export interface secureVaultInstanceInterface {
+    httpRequests<T = any>(config: ConfigInterface): Promise<any>;
+    signOut(): Promise<boolean>;
+    signIn(): Promise<{}>;
+    initialize(config: ConfigInterface): Promise<boolean>;
+}
 
-    node.appendChild(script);
-};
+const INIT = "init";
+const LOGIN = "login";
+const LOGOUT = "logout";
+const API_CALL = "httpRequest";
 
-injectScript(chrome.runtime.getURL("js/inject.js"), "head");
-
-window.addEventListener("message", (e) => {
-  if (e.data.origin && e.data.origin == "FROM_PAGE") {
-      chrome.runtime.sendMessage({ url: e.data.url, httpRequestInstanceID: e.data.httpRequestInstanceID }, (response) => {
-          window.postMessage({ origin: "FROM_SERVER", response })
-      });
-  }
-}, true);
-
-export {};
+export type MessageType =
+    | typeof INIT
+    | typeof LOGIN
+    | typeof LOGOUT
+    | typeof API_CALL;

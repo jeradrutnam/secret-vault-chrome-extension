@@ -11,19 +11,21 @@
             if (document.readyState === "complete") {
                 clearInterval(checkReady);
 
-                secureHTTP.get("http://api.webservice.com/getUser").then((response) => {
+                var secureVaultInstance = secureVaultAPI.getInstance();
+
+                secureVaultInstance.httpRequest("http://api.webservice.com/getUser").then((response) => {
                     console.log(response);
                 }, (error) => {
                     console.error(error);
                 });
     
-                secureHTTP.get("https://api.coindesk.com/v1/bpi/currentprice.json").then((response) => {
+                secureVaultInstance.httpRequest("https://api.coindesk.com/v1/bpi/currentprice.json").then((response) => {
                     console.log(response);
                 }, (error) => {
                     console.error(error);
                 });
 
-                secureHTTP.get("https://api.publicapis.org/entries").then((response) => {
+                secureVaultInstance.httpRequest("https://api.publicapis.org/entries").then((response) => {
                     console.log(response);
                 }, (error) => {
                     console.error(error);

@@ -1,49 +1,43 @@
-let httpCallStack = [];
+/**
+ * MIT License
+ * 
+ * Copyright (c) 2022 Jerad Rutnam (www.jeradrutnam.com)
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+**/
 
-const resolvePromise = (resolve, responseMessage) => {
-    resolve(responseMessage);
-};
+import { vaultClient } from "../utils/open-id-connect/client";
 
-const rejectPromise = (reject, errorMessage) => {
-    reject(errorMessage);
-};
+let secureVaultInstance;
 
-const uniqueIDGen = () => {
-    return "UUID" + Math.floor(Math.random() * 100) + Date.now();
-}
-
-window.secureHTTP = {
-    get: (apiEndpoint) => {
-        const instanceID = uniqueIDGen();
-        
-        return new Promise((resolve, reject) => {
-            window.postMessage({ type: "FROM_PAGE", url: apiEndpoint, instanceID: instanceID });
-
-            httpCallStack.push({ 
-                ["instanceID"]:instanceID,
-                ["resolve"]: resolve,
-                ["reject"]: reject
-            });
-        });
-    }
-}
-
-window.addEventListener("message", (e) => {
-    if (e.data.type && e.data.type == "FROM_SERVER") {
-
-        const httpRequests = httpCallStack.filter(httpRequest => httpRequest.instanceID === e.data.response.instanceID);
-
-        if (httpRequests.length > 0) {
-            httpRequests.forEach((httpRequest) => {
-                if (e.data.response.status === "success") {
-                    resolvePromise(httpRequest.resolve, e.data.response.message);
-                }
-                else {
-                    rejectPromise(httpRequest.reject, e.data.response.message);
-                }
-                
-                httpCallStack.splice(httpCallStack.findIndex(({ instanceID }) => instanceID == httpRequest.instanceID), 1);
-            });
+window.secureVaultAPI = {
+    getInstance: () => {
+        if (secureVaultInstance) {
+            return secureVaultInstance;
         }
+
+        secureVaultInstance = vaultClient;
+
+        window.addEventListener("message", (e) => {
+            secureVaultInstance.handleMessage(e);
+        }, true);
+
+        return secureVaultInstance;
     }
-}, true);
+}
