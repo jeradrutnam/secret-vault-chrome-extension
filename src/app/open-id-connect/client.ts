@@ -22,7 +22,7 @@
  * SOFTWARE.
 **/
 
-import { ConfigInterface, MessageStatuses, MessageTypes } from "./models";
+import { ConfigInterface, MessageStatuses, MessageTypes, MessageOrigins } from "../../models/message";
 import { uniqueIDGen } from "../../utils/string-utils";
 import { resolvePromise, rejectPromise, until } from "../../utils/promise-utils";
 
@@ -59,7 +59,7 @@ export class vaultClient {
 		this.getInstance()._authConfig = config;
 
         window.postMessage({
-            origin: "FROM_PAGE",
+            origin: MessageOrigins.PAGE,
             type: MessageTypes.INIT,
             body: {
                 config: this.getInstance()._authConfig
@@ -92,7 +92,7 @@ export class vaultClient {
                 const httpRequestInstanceID = uniqueIDGen();
 
                 window.postMessage({ 
-                    origin: "FROM_PAGE", 
+                    origin: MessageOrigins.PAGE, 
                     type: MessageTypes.API_CALL,
                     body: {
                         url: url, 
@@ -113,7 +113,7 @@ export class vaultClient {
     }
 
     public static handleMessage = (message) => {
-        if (message.data.origin && message.data.origin == "FROM_SERVER") {
+        if (message.data.origin && message.data.origin == MessageOrigins.BACKGROUND) {
 
             switch(message.data.response.originalRequest.type) {
                 case MessageTypes.INIT:

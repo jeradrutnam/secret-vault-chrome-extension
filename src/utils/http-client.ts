@@ -22,36 +22,39 @@
  * SOFTWARE.
 **/
 
-import { MessageOrigins } from "../models/message";
+import { responseStatus, json, isValidResponse } from "../utils/response-utils";
+import { httpRequestObjectInterface } from "../models/http";
 
-/**
- * Method to inject client scripts to the web application
- * 
- * @param file_path 
- * @param tag 
- */
-const injectScript = (file_path, tag) => {
-    const node = document.getElementsByTagName(tag)[0];
-    const script = document.createElement("script");
+export class httpClient {
+    private static _instance: httpClient;
 
-    script.setAttribute("type", "text/javascript");
-    script.setAttribute("src", file_path);
+    private constructor() {}
 
-    node.appendChild(script);
-};
+    public static getInstance = () => {
+        if (this._instance) {
+            return this._instance;
+        }
 
-injectScript(chrome.runtime.getURL("js/inject.js"), "head"); 
+        this._instance = new httpClient();
 
-/**
- * Window event listener to catch client messages and pass those to extension background for process
- * and post the background response to the client
- */
-window.addEventListener("message", (e) => {
-  if (e.data.origin && e.data.origin == MessageOrigins.PAGE) {
-        chrome.runtime.sendMessage({ type: e.data.type, body: e.data.body }, (response) => {
-            window.postMessage({ origin: MessageOrigins.BACKGROUND, response });
+        return this._instance;
+    }
+
+    public get = (request: httpRequestObjectInterface) => {
+        return new Promise((resolve, reject) => {
+            fetch(request.url)
+                .then(responseStatus)
+                .then(json)
+                .then((data) => {
+                    if (isValidResponse(data)) {
+                        resolve(data);
+                    }
+                    else {
+                        reject("Response is not a valid JSON object or string");
+                    }
+                }).catch(() => {
+                    reject("Cannot reach the endpoint");
+                });
         });
-  }
-}, true);
-
-export {};
+    }
+}

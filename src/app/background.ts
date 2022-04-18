@@ -22,8 +22,8 @@
  * SOFTWARE.
 **/
 
-import { MessageStatuses, MessageTypes } from "./open-id-connect/models";
-import { responseStatus, json, isValidResponse } from "../utils/response-utils";
+import { MessageStatuses, MessageTypes } from "../models/message";
+import { httpClient } from "../utils/http-client";
 
 const getCurrentTab = async () => {
     let queryOptions = { active: true, currentWindow: true };
@@ -54,24 +54,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             break;
         case MessageTypes.API_CALL:
-            fetch(request.body.url)
-                .then(responseStatus)
-                .then(json)
-                .then((data) => {
-                    if (isValidResponse(data)) {
-                        sendResponse({
-                            status: MessageStatuses.SUCCESS,
-                            message: data,
-                            originalRequest: request
-                        });
-                    }
-                    else {
-                        sendResponse({
-                            status: MessageStatuses.FAILED,
-                            message: "Response is not a valid JSON object or string",
-                            originalRequest: request
-                        });
-                    }
+            const http = httpClient.getInstance();
+
+            http.get({
+                url: request.body.url 
+            }).then((data) => {
+                    sendResponse({
+                        status: MessageStatuses.SUCCESS,
+                        message: data,
+                        originalRequest: request
+                    });
                 }).catch(() => {
                     sendResponse({
                         status: MessageStatuses.FAILED,

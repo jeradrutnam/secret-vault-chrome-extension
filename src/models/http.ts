@@ -22,36 +22,7 @@
  * SOFTWARE.
 **/
 
-import { MessageOrigins } from "../models/message";
-
-/**
- * Method to inject client scripts to the web application
- * 
- * @param file_path 
- * @param tag 
- */
-const injectScript = (file_path, tag) => {
-    const node = document.getElementsByTagName(tag)[0];
-    const script = document.createElement("script");
-
-    script.setAttribute("type", "text/javascript");
-    script.setAttribute("src", file_path);
-
-    node.appendChild(script);
-};
-
-injectScript(chrome.runtime.getURL("js/inject.js"), "head"); 
-
-/**
- * Window event listener to catch client messages and pass those to extension background for process
- * and post the background response to the client
- */
-window.addEventListener("message", (e) => {
-  if (e.data.origin && e.data.origin == MessageOrigins.PAGE) {
-        chrome.runtime.sendMessage({ type: e.data.type, body: e.data.body }, (response) => {
-            window.postMessage({ origin: MessageOrigins.BACKGROUND, response });
-        });
-  }
-}, true);
-
-export {};
+export interface httpRequestObjectInterface {
+    header?: string;
+    url: string;
+}

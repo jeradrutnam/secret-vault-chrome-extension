@@ -22,36 +22,45 @@
  * SOFTWARE.
 **/
 
-import { MessageOrigins } from "../models/message";
+export interface ConfigInterface {
+    clientID: string;
+    discoveryEndpointURL: string;
+    logoutSuccessRedirectURL: string;
+    loginSuccessRedirectURL: string;
+}
 
-/**
- * Method to inject client scripts to the web application
- * 
- * @param file_path 
- * @param tag 
- */
-const injectScript = (file_path, tag) => {
-    const node = document.getElementsByTagName(tag)[0];
-    const script = document.createElement("script");
+export interface secureVaultInstanceInterface {
+    httpRequests<T = any>(config: ConfigInterface): Promise<any>;
+    signOut(): Promise<boolean>;
+    signIn(): Promise<{}>;
+    initialize(config: ConfigInterface): Promise<boolean>;
+}
 
-    script.setAttribute("type", "text/javascript");
-    script.setAttribute("src", file_path);
+export interface httpRequestObjectInterface {
+    header?: string;
+    url: string;
+}
 
-    node.appendChild(script);
-};
+export const MessageOrigins = {
+    PAGE: "page",
+    CLIENT: "client",
+    BACKGROUND: "background"
+}
 
-injectScript(chrome.runtime.getURL("js/inject.js"), "head"); 
+export const MessageTypes = {
+    INIT: "init",
+    LOGIN: "login",
+    LOGOUT: "logout",
+    API_CALL: "httpRequest"
+}
 
-/**
- * Window event listener to catch client messages and pass those to extension background for process
- * and post the background response to the client
- */
-window.addEventListener("message", (e) => {
-  if (e.data.origin && e.data.origin == MessageOrigins.PAGE) {
-        chrome.runtime.sendMessage({ type: e.data.type, body: e.data.body }, (response) => {
-            window.postMessage({ origin: MessageOrigins.BACKGROUND, response });
-        });
-  }
-}, true);
+export const MessageStatuses = {
+    SUCCESS: "success",
+    FAILED: "failed"
+}
 
-export {};
+export type MessageType =
+    | typeof MessageTypes.INIT
+    | typeof MessageTypes.LOGIN
+    | typeof MessageTypes.LOGOUT
+    | typeof MessageTypes.API_CALL;

@@ -35,21 +35,3 @@ export interface secureVaultInstanceInterface {
     signIn(): Promise<{}>;
     initialize(config: ConfigInterface): Promise<boolean>;
 }
-
-export const MessageTypes = {
-    INIT: "init",
-    LOGIN: "login",
-    LOGOUT: "logout",
-    API_CALL: "httpRequest"
-}
-
-export const MessageStatuses = {
-    SUCCESS: "success",
-    FAILED: "failed"
-}
-
-export type MessageType =
-    | typeof MessageTypes.INIT
-    | typeof MessageTypes.LOGIN
-    | typeof MessageTypes.LOGOUT
-    | typeof MessageTypes.API_CALL;
