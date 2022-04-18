@@ -22,22 +22,24 @@
  * SOFTWARE.
 **/
 
-import { vaultClient } from "./open-id-connect/client";
-
-let secureVaultInstance;
-
-window.secureVaultAPI = {
-    getInstance: () => {
-        if (secureVaultInstance) {
-            return secureVaultInstance;
+export const until = async (condFunc: () => boolean) => {
+    return new Promise((resolve) => {
+        if (condFunc()) {
+            resolve(null);
         }
+        else {
+            setTimeout(async () => {
+                await until(condFunc);
+                resolve(null);
+            }, 100);
+        }
+    });
+};
 
-        secureVaultInstance = vaultClient;
+export const resolvePromise = (resolve, responseMessage) => {
+    resolve(responseMessage);
+};
 
-        window.addEventListener("message", (e) => {
-            secureVaultInstance.handleMessage(e);
-        }, true);
-
-        return secureVaultInstance;
-    }
-}
+export const rejectPromise = (reject, errorMessage) => {
+    reject(errorMessage);
+};

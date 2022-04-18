@@ -22,22 +22,22 @@
  * SOFTWARE.
 **/
 
-import { vaultClient } from "./open-id-connect/client";
+export class MemoryStore {
+    private _data: Map<string, string>;
 
-let secureVaultInstance;
+    public constructor() {
+        this._data = new Map();
+    }
 
-window.secureVaultAPI = {
-    getInstance: () => {
-        if (secureVaultInstance) {
-            return secureVaultInstance;
-        }
+    public async setData(key: string, value: string): Promise<void> {
+        this._data.set(key, value);
+    }
 
-        secureVaultInstance = vaultClient;
+    public async getData(key: string): Promise<string> {
+        return this._data?.get(key) ?? "{}";
+    }
 
-        window.addEventListener("message", (e) => {
-            secureVaultInstance.handleMessage(e);
-        }, true);
-
-        return secureVaultInstance;
+    public async removeData(key: string): Promise<void> {
+        this._data.delete(key);
     }
 }

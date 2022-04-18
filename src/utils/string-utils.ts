@@ -22,22 +22,6 @@
  * SOFTWARE.
 **/
 
-import { vaultClient } from "./open-id-connect/client";
-
-let secureVaultInstance;
-
-window.secureVaultAPI = {
-    getInstance: () => {
-        if (secureVaultInstance) {
-            return secureVaultInstance;
-        }
-
-        secureVaultInstance = vaultClient;
-
-        window.addEventListener("message", (e) => {
-            secureVaultInstance.handleMessage(e);
-        }, true);
-
-        return secureVaultInstance;
-    }
+export const uniqueIDGen = () => {
+    return "UUID" + Math.floor(Math.random() * 100) + Date.now();
 }

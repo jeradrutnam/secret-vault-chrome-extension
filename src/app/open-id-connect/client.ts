@@ -23,28 +23,14 @@
 **/
 
 import { ConfigInterface, MessageStatuses, MessageTypes } from "./models";
-
-const uniqueIDGen = () => {
-    return "UUID" + Math.floor(Math.random() * 100) + Date.now();
-}
-
-const resolvePromise = (resolve, responseMessage) => {
-    resolve(responseMessage);
-};
-
-const rejectPromise = (reject, errorMessage) => {
-    reject(errorMessage);
-};
+import { uniqueIDGen } from "../../utils/string-utils";
+import { resolvePromise, rejectPromise, until } from "../../utils/promise-utils";
 
 export class vaultClient {
     private static _instance: vaultClient;
-    private static _isInitialized = false;
     private _authConfig: ConfigInterface;
-    private static _init = { 
-        ["isInitialized"]: false,
-        ["resolve"]: null,
-        ["reject"]: null
-    };
+    private static _initializationTriggered = false;
+    private static _isInitialized = false;
     private _httpCallStack = [];
 
     private constructor() {}
@@ -68,49 +54,61 @@ export class vaultClient {
     }
 
     public static initialize = (config: ConfigInterface) => {
+        this._initializationTriggered = true;
+
 		this.getInstance()._authConfig = config;
 
-        return new Promise((resolve, reject) => {
-            window.postMessage({
-                origin: "FROM_PAGE",
-                type: MessageTypes.INIT,
-                body: {
-                    config: this.getInstance()._authConfig
-                }
-            });
+        window.postMessage({
+            origin: "FROM_PAGE",
+            type: MessageTypes.INIT,
+            body: {
+                config: this.getInstance()._authConfig
+            }
         });
     }
 
     public static isInitialized = () => {
-		return this._init.isInitialized;
+		return this._isInitialized;
     }
 
-    public static signIn = (callback?) => {
+    public static signIn = async (callback?) => {
+
+        await until(() => !this._initializationTriggered);
 		// TODO: Implement operation
     }
 
-    public static signOut = (callback?) => {
+    public static signOut = async (callback?) => {
+
+        await until(() => !this._initializationTriggered);
 		// TODO: Implement operation
     }
 
-    public static httpRequest = (url) => {
-        const httpRequestInstanceID = uniqueIDGen();
-        
+    public static httpRequest = async (url) => {
+
+        await until(() => !this._initializationTriggered);
+
         return new Promise((resolve, reject) => {
-            window.postMessage({ 
-                origin: "FROM_PAGE", 
-                type: MessageTypes.API_CALL,
-                body: {
-                    url: url, 
-                    httpRequestInstanceID: httpRequestInstanceID
-                }
-            });
+            if (this._isInitialized) {
+                const httpRequestInstanceID = uniqueIDGen();
 
-            this.getInstance().addToHTTPCallStack({ 
-                ["httpRequestInstanceID"]: httpRequestInstanceID,
-                ["resolve"]: resolve,
-                ["reject"]: reject
-            });
+                window.postMessage({ 
+                    origin: "FROM_PAGE", 
+                    type: MessageTypes.API_CALL,
+                    body: {
+                        url: url, 
+                        httpRequestInstanceID: httpRequestInstanceID
+                    }
+                });
+
+                this.getInstance().addToHTTPCallStack({ 
+                    ["httpRequestInstanceID"]: httpRequestInstanceID,
+                    ["resolve"]: resolve,
+                    ["reject"]: reject
+                });
+            }
+            else {
+                reject("Before making API requests. Secure vault need to be initialized.");
+            }
         });
     }
 
@@ -120,11 +118,13 @@ export class vaultClient {
             switch(message.data.response.originalRequest.type) {
                 case MessageTypes.INIT:
                     if (message.data.response.status === MessageStatuses.SUCCESS) {
-                        this._init.isInitialized = true;
+                        this._isInitialized = true;
                     } 
                     else {
                         console.error("Secure Vault Initialize failed!");
                     }
+
+                    this._initializationTriggered = false;
 
                     break;
                 case MessageTypes.API_CALL:

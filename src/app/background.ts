@@ -22,7 +22,8 @@
  * SOFTWARE.
 **/
 
-import { MessageStatuses, MessageTypes } from "../utils/open-id-connect/models";
+import { MessageStatuses, MessageTypes } from "./open-id-connect/models";
+import { responseStatus, json, isValidResponse } from "../utils/response-utils";
 
 const getCurrentTab = async () => {
     let queryOptions = { active: true, currentWindow: true };
@@ -32,30 +33,6 @@ const getCurrentTab = async () => {
 };
 
 let tab = await getCurrentTab();
-
-const responseStatus = (response) => {
-    if (response.status >= 200 && response.status < 300) {
-        return Promise.resolve(response)
-    } else {
-        return Promise.reject(new Error(response.statusText))
-    }
-}
-
-const json = (response) => {
-    return response.json()
-}
-
-const isValidResponse = (value) => {
-    if (value == typeof(String)) {
-        try {
-            JSON.parse(value);
-        } catch (e) {
-            return false;
-        }
-    }
-
-    return true;
-};
 
 chrome.tabs.onActivated.addListener(() => {
     if (/^http:\/\/localhost:3000/.test(tab.url)) {
@@ -70,8 +47,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch(request.type) {
         case MessageTypes.INIT:
             sendResponse({
-                status: MessageStatuses.FAILED,
-                message: "Need to implement",
+                status: MessageStatuses.SUCCESS,
+                message: "Initialized!",
                 originalRequest: request
             });
 

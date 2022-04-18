@@ -22,22 +22,26 @@
  * SOFTWARE.
 **/
 
-import { vaultClient } from "./open-id-connect/client";
-
-let secureVaultInstance;
-
-window.secureVaultAPI = {
-    getInstance: () => {
-        if (secureVaultInstance) {
-            return secureVaultInstance;
-        }
-
-        secureVaultInstance = vaultClient;
-
-        window.addEventListener("message", (e) => {
-            secureVaultInstance.handleMessage(e);
-        }, true);
-
-        return secureVaultInstance;
+export const responseStatus = (response) => {
+    if (response.status >= 200 && response.status < 300) {
+        return Promise.resolve(response)
+    } else {
+        return Promise.reject(new Error(response.statusText))
     }
 }
+
+export const json = (response) => {
+    return response.json()
+}
+
+export const isValidResponse = (value) => {
+    if (value == typeof(String)) {
+        try {
+            JSON.parse(value);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    return true;
+};
