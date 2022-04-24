@@ -122,11 +122,7 @@ export class vault {
 
     private requestAccessToken = async (config, code, session_state, state, pkce) => {
         if (pkce && config.enablePKCE) {
-            let pckeCode;
-
-            chrome.storage.sync.get([pkce], async (result) => {
-                pckeCode = result[pkce];
-            });
+            let pckeCode = await this._chromeStore.getData(pkce);
 
             await this._authClient.setPKCECode(pckeCode, state ?? "");
         }
@@ -136,11 +132,10 @@ export class vault {
                     code,
                     session_state ?? "",
                     state ?? ""
-                ).then((response) => {
-                    resolve({
-                        message: response,
-                        isAuthenticated: true
-                    });
+                ).then(() => {
+                    this.refreshAccessTokenAutomatically();
+
+                    resolve(this.getBasicUserInfo());
                 }).catch((error) => {
                     reject(error);
                 });
@@ -165,7 +160,10 @@ export class vault {
             if (code !== "") {
                 this.requestAccessToken(config, code, session_state, state, pkce)
                     .then((data) => {
-                        resolve(data);
+                        resolve({
+                            message: data,
+                            isAuthenticated: true
+                        });
                     }).catch((error) => {
                         reject(error);
                     });
@@ -178,7 +176,7 @@ export class vault {
                         const pkce: string = await this._authClient.getPKCECode(state);
 
                         if (pkce && config.enablePKCE) {
-                            this._chromeStore.setData(pkceKey, pkce);
+                            await this._chromeStore.setData(pkceKey, pkce);
                         }
 
                         resolve({

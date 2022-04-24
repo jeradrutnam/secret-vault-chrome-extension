@@ -27,20 +27,39 @@ export class ChromeStore {
     public constructor() { }
 
     public async setData(key: string, value: string): Promise<void> {
-        return await chrome.storage.sync.set({[key]: value});
+        return new Promise((resolve, reject) => {
+            try {
+                chrome.storage.sync.set({[key]: value}, () => {
+                    resolve();
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 
     public async getData(key: string): Promise<string> {
-        let value;
-        
-        await chrome.storage.sync.get([key], async (result) => {
-            return await result[key];
+        return new Promise((resolve, reject) => {
+            try {
+                chrome.storage.sync.get(key, (value) => {
+                    resolve(value[key]);
+                });
+            } catch (error) {
+                reject(error);
+            }
         });
-
-        return await value;
     }
 
     public async removeData(key: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            try {
+                chrome.storage.sync.remove(key, () => {
+                    resolve();
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
         await chrome.storage.sync.remove([key]);
     }
 }

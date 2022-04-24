@@ -170,9 +170,10 @@ export class vaultClient {
                             window.location.href = message.data.response.message.url;
                         }
                         else {
-                            removeAuthorizationCode();
                             this._onSignInCallback(message.data.response.message);
                         }
+
+                        removeAuthorizationCode();
                     }
                     else {
                         console.error(message.data.response.message);

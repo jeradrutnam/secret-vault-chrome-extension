@@ -28,8 +28,7 @@
     <title>Testing</title>
 </head>
 <body>
-    <h1>Hello World!</h1>
-    <button id="mybutton">click me</button>
+    <h1>Hello <span id="name">World!</span></h1>
     <script type="text/javascript">
         var checkReady = setInterval(() => {
             if (document.readyState === "complete") {
@@ -49,6 +48,7 @@
 
                 secureVaultInstance.on("signIn", (response) => {
                     console.log(response);
+                    document.getElementById("name").innerHTML = response.message.username;
                 });
 
                 /* secureVaultInstance.httpRequest("http://api.webservice.com/getUser").then((response) => {
