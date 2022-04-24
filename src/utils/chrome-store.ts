@@ -60,6 +60,5 @@ export class ChromeStore {
                 reject(error);
             }
         });
-        await chrome.storage.sync.remove([key]);
     }
 }
