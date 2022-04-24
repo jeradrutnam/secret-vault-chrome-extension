@@ -22,20 +22,6 @@
  * SOFTWARE.
 **/
 
-export interface ConfigInterface {
-    clientID: string;
-    discoveryEndpointURL: string;
-    logoutSuccessRedirectURL: string;
-    loginSuccessRedirectURL: string;
-}
-
-export interface secureVaultInstanceInterface {
-    httpRequests<T = any>(config: ConfigInterface): Promise<any>;
-    signOut(): Promise<boolean>;
-    signIn(): Promise<{}>;
-    initialize(config: ConfigInterface): Promise<boolean>;
-}
-
 export interface httpRequestObjectInterface {
     header?: string;
     url: string;
@@ -51,7 +37,8 @@ export const MessageTypes = {
     INIT: "init",
     LOGIN: "login",
     LOGOUT: "logout",
-    API_CALL: "httpRequest"
+    API_CALL: "httpRequest",
+    CHECK_AUTHENTICATION: "isAuthenticated"
 }
 
 export const MessageStatuses = {
@@ -63,4 +50,5 @@ export type MessageType =
     | typeof MessageTypes.INIT
     | typeof MessageTypes.LOGIN
     | typeof MessageTypes.LOGOUT
-    | typeof MessageTypes.API_CALL;
+    | typeof MessageTypes.API_CALL
+    | typeof MessageTypes.CHECK_AUTHENTICATION;

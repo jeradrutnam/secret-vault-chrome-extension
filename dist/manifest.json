@@ -24,7 +24,8 @@
     "permissions": [
       "activeTab",
       "tabs",
-      "scripting"
+      "scripting",
+      "storage"
     ],
     "web_accessible_resources": [{ 
       "resources": [ "js/inject.js" ],

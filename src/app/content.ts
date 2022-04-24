@@ -47,11 +47,11 @@ injectScript(chrome.runtime.getURL("js/inject.js"), "head");
  * and post the background response to the client
  */
 window.addEventListener("message", (e) => {
-  if (e.data.origin && e.data.origin == MessageOrigins.PAGE) {
+    if (e.data.origin && e.data.origin == MessageOrigins.PAGE) {
         chrome.runtime.sendMessage({ type: e.data.type, body: e.data.body }, (response) => {
             window.postMessage({ origin: MessageOrigins.BACKGROUND, response });
         });
-  }
+    }
 }, true);
 
 export {};

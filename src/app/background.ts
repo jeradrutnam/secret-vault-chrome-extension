@@ -23,7 +23,7 @@
 **/
 
 import { MessageStatuses, MessageTypes } from "../models/message";
-import { httpClient } from "../utils/http-client";
+import { vault } from "./open-id-connect/vault";
 
 const getCurrentTab = async () => {
     let queryOptions = { active: true, currentWindow: true };
@@ -44,19 +44,62 @@ chrome.tabs.onActivated.addListener(() => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    const vaultInstance = vault.getInstance();
+
     switch(request.type) {
         case MessageTypes.INIT:
-            sendResponse({
-                status: MessageStatuses.SUCCESS,
-                message: "Initialized!",
-                originalRequest: request
-            });
+            vaultInstance.initialize(request.body.config)
+                .then((data) => {
+                    sendResponse({
+                        status: MessageStatuses.SUCCESS,
+                        message: data,
+                        originalRequest: request
+                    });
+                }).catch((error) => {
+                    sendResponse({
+                        status: MessageStatuses.FAILED,
+                        message: error,
+                        originalRequest: request
+                    });
+                });
+
+            break;
+        case MessageTypes.CHECK_AUTHENTICATION:
+            vaultInstance.isAuthenticated()
+                .then((data) => {
+                    sendResponse({
+                        status: MessageStatuses.SUCCESS,
+                        message: data,
+                        originalRequest: request
+                    });
+                }).catch((error) => {
+                    sendResponse({
+                        status: MessageStatuses.FAILED,
+                        message: error,
+                        originalRequest: request
+                    });
+                });
+
+            break;
+        case MessageTypes.LOGIN:
+            vaultInstance.signIn(request.body)
+                .then((data) => {
+                    sendResponse({
+                        status: MessageStatuses.SUCCESS,
+                        message: data,
+                        originalRequest: request
+                    });
+                }).catch((error) => {
+                    sendResponse({
+                        status: MessageStatuses.FAILED,
+                        message: error,
+                        originalRequest: request
+                    });
+                });
 
             break;
         case MessageTypes.API_CALL:
-            const http = httpClient.getInstance();
-
-            http.get({
+            vaultInstance.httpGet({
                 url: request.body.url 
             }).then((data) => {
                     sendResponse({
@@ -64,10 +107,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         message: data,
                         originalRequest: request
                     });
-                }).catch(() => {
+                }).catch((error) => {
                     sendResponse({
                         status: MessageStatuses.FAILED,
-                        message: "Cannot reach the endpoint",
+                        message: error,
                         originalRequest: request
                     });
                 });

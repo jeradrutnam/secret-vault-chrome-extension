@@ -22,8 +22,12 @@
  * SOFTWARE.
 **/
 
-import { ConfigInterface, MessageStatuses, MessageTypes, MessageOrigins } from "../../models/message";
+import { AuthenticationUtils } from "@asgardeo/auth-js";
+import { MessageStatuses, MessageTypes, MessageOrigins } from "../../models/message";
+import { ConfigInterface } from "../../models/config";
+import { Hooks } from "../../models/hooks";
 import { uniqueIDGen } from "../../utils/string-utils";
+import { removeAuthorizationCode } from "../../utils/url-utils";
 import { resolvePromise, rejectPromise, until } from "../../utils/promise-utils";
 
 export class vaultClient {
@@ -32,6 +36,11 @@ export class vaultClient {
     private static _initializationTriggered = false;
     private static _isInitialized = false;
     private _httpCallStack = [];
+    private _signInRequest = {
+        resolve: null,
+        reject: null
+    };
+    private static _onSignInCallback: (response) => void = () => null;
 
     private constructor() {}
 
@@ -53,7 +62,7 @@ export class vaultClient {
         return this._instance;
     }
 
-    public static initialize = (config: ConfigInterface) => {
+    public static connectIdentityProvider = (config: ConfigInterface) => {
         this._initializationTriggered = true;
 
 		this.getInstance()._authConfig = config;
@@ -71,16 +80,42 @@ export class vaultClient {
 		return this._isInitialized;
     }
 
-    public static signIn = async (callback?) => {
+    public static signIn = async () => {
 
         await until(() => !this._initializationTriggered);
-		// TODO: Implement operation
+
+        return new Promise((resolve, reject) => {
+            if (this._isInitialized) {
+                window.postMessage({ 
+                    origin: MessageOrigins.PAGE, 
+                    type: MessageTypes.LOGIN,
+                    body: {
+                        pageUrl: window.location.href
+                    }
+                });
+            }
+            else {
+                reject("App should be connected to an Identity Provider before trigger Sign-in request.");
+            }
+        });
     }
 
-    public static signOut = async (callback?) => {
+    public static signOut = async () => {
 
         await until(() => !this._initializationTriggered);
-		// TODO: Implement operation
+
+        return new Promise((resolve, reject) => {
+            if (this._isInitialized) {
+                window.postMessage({ 
+                    origin: MessageOrigins.PAGE, 
+                    type: MessageTypes.LOGOUT,
+                    body: { }
+                });
+            }
+            else {
+                reject("App should be connected to an Identity Provider before trigger Sign-out request.");
+            }
+        });
     }
 
     public static httpRequest = async (url) => {
@@ -107,12 +142,13 @@ export class vaultClient {
                 });
             }
             else {
-                reject("Before making API requests. Secure vault need to be initialized.");
+                reject("Authorization is required before making secure API requests. " + 
+                    "Make sure secure vault is ininialized.");
             }
         });
     }
 
-    public static handleMessage = (message) => {
+    public static handleResponseMessage = (message) => {
         if (message.data.origin && message.data.origin == MessageOrigins.BACKGROUND) {
 
             switch(message.data.response.originalRequest.type) {
@@ -125,6 +161,26 @@ export class vaultClient {
                     }
 
                     this._initializationTriggered = false;
+
+                    break;
+                case MessageTypes.LOGIN:
+                    if (message.data.response.status === MessageStatuses.SUCCESS) {
+
+                        if (!message.data.response.message.isAuthenticated) {
+                            window.location.href = message.data.response.message.url;
+                        }
+                        else {
+                            removeAuthorizationCode();
+                            this._onSignInCallback(message.data.response.message);
+                        }
+                    }
+                    else {
+                        console.error(message.data.response.message);
+                    }
+
+                    break;
+                case MessageTypes.LOGOUT:
+                    // Code block;
 
                     break;
                 case MessageTypes.API_CALL:
@@ -149,9 +205,26 @@ export class vaultClient {
 
                     break;
                 default:
-                    return
+                    return;
                     // code block
             }
+        }
+    }
+
+    public static on = async (hook, callback?) => {
+        
+        await until(() => !this._initializationTriggered);
+
+        if (callback && typeof callback === "function") {
+            switch (hook) {
+                case Hooks.SIGN_IN:
+                    this._onSignInCallback = callback;
+                    break;
+                default:
+                    console.error("Not a valid hook");
+            }
+        } else {
+            console.error("Error on hook!")
         }
     }
 }

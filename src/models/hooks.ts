@@ -22,28 +22,11 @@
  * SOFTWARE.
 **/
 
-import { vaultClient } from "./open-id-connect/client";
-
-let secureVaultInstance;
-
-/**
- * Bind secure vault API to window object
- */
-window.secureVaultAPI = {
-    getInstance: () => {
-        if (secureVaultInstance) {
-            return secureVaultInstance;
-        }
-
-        secureVaultInstance = vaultClient;
-
-        /**
-         * Window event listener to catch client messages and handle response
-         */
-        window.addEventListener("message", (e) => {
-            secureVaultInstance.handleResponseMessage(e);
-        }, true);
-
-        return secureVaultInstance;
-    }
+export const Hooks = {
+    SIGN_IN: "signIn",
+    SIGN_OUT: "SignOut"
 }
+
+export type HookType =
+    | typeof Hooks.SIGN_IN
+    | typeof Hooks.SIGN_OUT;

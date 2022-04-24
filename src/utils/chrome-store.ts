@@ -22,28 +22,25 @@
  * SOFTWARE.
 **/
 
-import { vaultClient } from "./open-id-connect/client";
+export class ChromeStore {
 
-let secureVaultInstance;
+    public constructor() { }
 
-/**
- * Bind secure vault API to window object
- */
-window.secureVaultAPI = {
-    getInstance: () => {
-        if (secureVaultInstance) {
-            return secureVaultInstance;
-        }
+    public async setData(key: string, value: string): Promise<void> {
+        return await chrome.storage.sync.set({[key]: value});
+    }
 
-        secureVaultInstance = vaultClient;
+    public async getData(key: string): Promise<string> {
+        let value;
+        
+        await chrome.storage.sync.get([key], async (result) => {
+            return await result[key];
+        });
 
-        /**
-         * Window event listener to catch client messages and handle response
-         */
-        window.addEventListener("message", (e) => {
-            secureVaultInstance.handleResponseMessage(e);
-        }, true);
+        return await value;
+    }
 
-        return secureVaultInstance;
+    public async removeData(key: string): Promise<void> {
+        await chrome.storage.sync.remove([key]);
     }
 }

@@ -37,18 +37,25 @@
 
                 var secureVaultInstance = secureVaultAPI.getInstance();
 
-                secureVaultInstance.initialize({
-                    clientID: "client ID",
-                    discoveryEndpointURL: "https://api.asgardeo.io/t/<org_name>",
-                    logoutSuccessRedirectURL: "http://localhost:3000/dashboard",
-                    loginSuccessRedirectURL: "http://localhost:3000/sign-in"
-               });
+                secureVaultInstance.connectIdentityProvider({
+                    signInRedirectURL: "http://localhost:3000/app", // Application Sign-In request handle URL
+                    signOutRedirectURL: "http://localhost:3000/dashboard", // Application Sign-out request handle URL
+                    clientID: "", // Application register ID
+                    baseUrl: "https://api.asgardeo.io/t/<org>", // Identity Provider Account Base Path
+                    scope: [ "openid", "profile" ]
+                });
 
-                secureVaultInstance.httpRequest("http://api.webservice.com/getUser").then((response) => {
+                secureVaultInstance.signIn();
+
+                secureVaultInstance.on("signIn", (response) => {
+                    console.log(response);
+                });
+
+                /* secureVaultInstance.httpRequest("http://api.webservice.com/getUser").then((response) => {
                     console.log(response);
                 }, (error) => {
                     console.error(error);
-                });
+                }); */
     
                 /* TODO: Temporally commented for avoid unwanted public API Calls
                 secureVaultInstance.httpRequest("https://api.coindesk.com/v1/bpi/currentprice.json").then((response) => {
@@ -63,6 +70,7 @@
                     console.error(error);
                 });
                 */
+                
             }
         });
     </script>

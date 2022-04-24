@@ -22,10 +22,8 @@
  * SOFTWARE.
 **/
 
-import { MemoryStore } from "../../utils/memory-store";
+export const removeAuthorizationCode = (): void => {
+    const url = location.href;
 
-export class vault {
-    private _storage = new MemoryStore();
-
-    private constructor() {}
+    history.pushState({}, document.title, url.replace(/\?code=.*$/, ""));
 }
