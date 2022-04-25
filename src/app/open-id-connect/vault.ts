@@ -29,8 +29,6 @@ import { CryptoUtils } from "../../utils/crypto-utils";
 import { httpClient } from "../../utils/http-client";
 import { ConfigInterface } from "../../models/config";
 
-const REFRESH_TOKEN_TIMER = "refreshTokenTimer";
-
 export class vault {
     private static _instance: vault;
     private _authConfig: ConfigInterface;
@@ -94,32 +92,6 @@ export class vault {
         return await this._authClient.getBasicUserInfo();
     };
 
-    private refreshAccessTokenAutomatically = async (): Promise<void> => {
-        const sessionData = await this._dataLayer.getSessionData();
-
-        if (sessionData.refresh_token) {
-            // Refresh 10 seconds before the expiry time
-            const expiryTime = parseInt(sessionData.expires_in);
-            const time = expiryTime <= 10 ? expiryTime : expiryTime - 10;
-
-            const timer = setTimeout(async () => {
-                await this._authClient.refreshAccessToken();
-            }, time * 1000);
-
-            await this._dataLayer.setTemporaryDataParameter("refreshTimer", JSON.stringify(timer));
-        }
-    }
-
-    private clearRefreshTokenTimeout = async (): Promise<void> => {
-        if (await this._dataLayer.getTemporaryDataParameter(REFRESH_TOKEN_TIMER)) {
-            const oldTimer = JSON.parse(
-                (await this._dataLayer.getTemporaryDataParameter(REFRESH_TOKEN_TIMER)) as string
-            );
-
-            clearTimeout(oldTimer);
-        }
-    }
-
     private requestAccessToken = async (config, code, session_state, state, pkce) => {
         if (pkce && config.enablePKCE) {
             let pckeCode = await this._chromeStore.getData(pkce);
@@ -133,8 +105,6 @@ export class vault {
                     session_state ?? "",
                     state ?? ""
                 ).then(() => {
-                    this.refreshAccessTokenAutomatically();
-
                     resolve(this.getBasicUserInfo());
                 }).catch((error) => {
                     reject(error);
@@ -151,11 +121,6 @@ export class vault {
             const state: string = urlObject.searchParams.get('state') ?? "";
             const session_state: string = urlObject.searchParams.get('session_state') ?? "";
             const pkce: string = (state !== "") ? AuthenticationUtils.extractPKCEKeyFromStateParam(state) : "";
-
-            if (this.isAuthenticated()) {
-                await this.refreshAccessTokenAutomatically();
-                await this.clearRefreshTokenTimeout();  
-            }
             
             if (code !== "") {
                 this.requestAccessToken(config, code, session_state, state, pkce)

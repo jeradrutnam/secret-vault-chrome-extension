@@ -22,7 +22,6 @@
  * SOFTWARE.
 **/
 
-import { AuthenticationUtils } from "@asgardeo/auth-js";
 import { MessageStatuses, MessageTypes, MessageOrigins } from "../../models/message";
 import { ConfigInterface } from "../../models/config";
 import { Hooks } from "../../models/hooks";
@@ -36,10 +35,6 @@ export class vaultClient {
     private static _initializationTriggered = false;
     private static _isInitialized = false;
     private _httpCallStack = [];
-    private _signInRequest = {
-        resolve: null,
-        reject: null
-    };
     private static _onSignInCallback: (response) => void = () => null;
 
     private constructor() {}
@@ -143,7 +138,7 @@ export class vaultClient {
             }
             else {
                 reject("Authorization is required before making secure API requests. " + 
-                    "Make sure secure vault is ininialized.");
+                    "Make sure secure vault is initialized.");
             }
         });
     }
