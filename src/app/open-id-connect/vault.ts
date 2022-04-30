@@ -153,15 +153,20 @@ export class vault {
 
     public signOut = () => {
         return new Promise(async (resolve, reject) => {
-            this._authClient.getSignOutURL()
-                .then(async (url) => {
-                    resolve({
-                        url: url,
-                        isAuthenticated: this.isAuthenticated()
+            if (this.isAuthenticated()) {
+                this._authClient.getSignOutURL()
+                    .then(async (url) => {
+                        resolve({
+                            url: url,
+                            isAuthenticated: this.isAuthenticated()
+                        });
+                    }).catch((error) => {
+                        reject(error);
                     });
-                }).catch((error) => {
-                    reject(error);
-                });  
+            }
+            else {
+                reject("User is not logged in!"); 
+            }
         });
     }
 

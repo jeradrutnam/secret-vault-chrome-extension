@@ -126,7 +126,7 @@ export class vaultClient {
 
         return new Promise((resolve, reject) => {
             if (this._isInitialized) {
-                this.getInstance()._sessionStore.removeData("signInInit");
+                this.getInstance()._sessionStore.setData("signOutInit", "true");
 
                 window.postMessage({ 
                     origin: MessageOrigins.PAGE, 
@@ -206,12 +206,12 @@ export class vaultClient {
                 case MessageTypes.LOGOUT:
 
                     if (message.data.response.status === MessageStatuses.SUCCESS) {
-                        if (message.data.response.message.isAuthenticated) {
-                            window.location.href = message.data.response.message.url;
-                        }
-                        else {
-                            this._onSignOutCallback("Logout successfully!");
-                        }
+                        this.getInstance()._sessionStore.removeData("signInInit");
+                        this.getInstance()._sessionStore.removeData("signOutInit");
+       
+                        window.location.href = message.data.response.message.url;
+    
+                        this._onSignOutCallback("Logout successfully!");
                     }
                     else {
                         console.error(message.data.response.message);

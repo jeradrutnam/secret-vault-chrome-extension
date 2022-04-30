@@ -98,6 +98,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
 
             break;
+        case MessageTypes.LOGOUT:
+            vaultInstance.signOut()
+                .then((data) => {
+                    sendResponse({
+                        status: MessageStatuses.SUCCESS,
+                        message: data,
+                        originalRequest: request
+                    });
+                }).catch((error) => {
+                    sendResponse({
+                        status: MessageStatuses.FAILED,
+                        message: error,
+                        originalRequest: request
+                    });
+                });
+
+            break;
         case MessageTypes.API_CALL:
             vaultInstance.httpGet({
                 url: request.body.url 
