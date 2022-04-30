@@ -26,28 +26,34 @@ import { MessageStatuses, MessageTypes, MessageOrigins } from "../../models/mess
 import { ConfigInterface } from "../../models/config";
 import { Hooks } from "../../models/hooks";
 import { uniqueIDGen } from "../../utils/string-utils";
+import { SessionStore } from "../../utils/session-store";
 import { removeAuthorizationCode } from "../../utils/url-utils";
 import { resolvePromise, rejectPromise, until } from "../../utils/promise-utils";
 
 export class vaultClient {
     private static _instance: vaultClient;
     private _authConfig: ConfigInterface;
+    private _sessionStore = new SessionStore();
     private static _initializationTriggered = false;
     private static _isInitialized = false;
     private _httpCallStack = [];
     private static _onSignInCallback: (response) => void = () => null;
+    private static _onSignOutCallback: (response) => void = () => null;
 
     private constructor() {}
 
     private getHTTPCallStack = () => {
+
         return this._httpCallStack;
     }
 
     private addToHTTPCallStack = (apiRequest) => {
+
         return this._httpCallStack.push(apiRequest);
     }
 
     public static getInstance = () => {
+
         if (this._instance) {
             return this._instance;
         }
@@ -58,6 +64,7 @@ export class vaultClient {
     }
 
     public static connectIdentityProvider = (config: ConfigInterface) => {
+
         this._initializationTriggered = true;
 
 		this.getInstance()._authConfig = config;
@@ -72,7 +79,23 @@ export class vaultClient {
     }
 
     public static isInitialized = () => {
+
 		return this._isInitialized;
+    }
+
+    public static checkSignIn = async () => {
+
+        if (this.isInitialized) {
+        
+            var signInInit = await this.getInstance()._sessionStore.getData("signInInit");
+
+            if (signInInit == "true") {
+                this.signIn();
+            }
+        }
+        else {
+            console.log("Need to connect to an Identity Provider first before calling this method.");
+        }
     }
 
     public static signIn = async () => {
@@ -81,6 +104,8 @@ export class vaultClient {
 
         return new Promise((resolve, reject) => {
             if (this._isInitialized) {
+                this.getInstance()._sessionStore.setData("signInInit", "true");
+
                 window.postMessage({ 
                     origin: MessageOrigins.PAGE, 
                     type: MessageTypes.LOGIN,
@@ -101,6 +126,8 @@ export class vaultClient {
 
         return new Promise((resolve, reject) => {
             if (this._isInitialized) {
+                this.getInstance()._sessionStore.removeData("signInInit");
+
                 window.postMessage({ 
                     origin: MessageOrigins.PAGE, 
                     type: MessageTypes.LOGOUT,
@@ -144,6 +171,7 @@ export class vaultClient {
     }
 
     public static handleResponseMessage = (message) => {
+
         if (message.data.origin && message.data.origin == MessageOrigins.BACKGROUND) {
 
             switch(message.data.response.originalRequest.type) {
@@ -176,7 +204,18 @@ export class vaultClient {
 
                     break;
                 case MessageTypes.LOGOUT:
-                    // Code block;
+
+                    if (message.data.response.status === MessageStatuses.SUCCESS) {
+                        if (message.data.response.message.isAuthenticated) {
+                            window.location.href = message.data.response.message.url;
+                        }
+                        else {
+                            this._onSignOutCallback("Logout successfully!");
+                        }
+                    }
+                    else {
+                        console.error(message.data.response.message);
+                    }
 
                     break;
                 case MessageTypes.API_CALL:
@@ -215,6 +254,9 @@ export class vaultClient {
             switch (hook) {
                 case Hooks.SIGN_IN:
                     this._onSignInCallback = callback;
+                    break;
+                case Hooks.SIGN_OUT:
+                    this._onSignOutCallback = callback;
                     break;
                 default:
                     console.error("Not a valid hook");

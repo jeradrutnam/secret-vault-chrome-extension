@@ -80,10 +80,6 @@ export class vault {
         return this._authClient.isAuthenticated();
     };
 
-    private getAccessToken = (): Promise<string> => {
-        return this._authClient.getAccessToken();
-    };
-
     private getDecodedIDToken = async (): Promise<DecodedIDTokenPayload> => {
         return await this._authClient.getDecodedIDToken();
     };
@@ -152,6 +148,20 @@ export class vault {
                         reject(error);
                     });
             }   
+        });
+    }
+
+    public signOut = () => {
+        return new Promise(async (resolve, reject) => {
+            this._authClient.getSignOutURL()
+                .then(async (url) => {
+                    resolve({
+                        url: url,
+                        isAuthenticated: this.isAuthenticated()
+                    });
+                }).catch((error) => {
+                    reject(error);
+                });  
         });
     }
 

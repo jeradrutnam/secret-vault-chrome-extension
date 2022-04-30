@@ -24,7 +24,7 @@
 
 export const Hooks = {
     SIGN_IN: "signIn",
-    SIGN_OUT: "SignOut"
+    SIGN_OUT: "signOut"
 }
 
 export type HookType =

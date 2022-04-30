@@ -29,12 +29,20 @@
 </head>
 <body>
     <h1>Hello <span id="name">World!</span></h1>
+
+    <button id="loginButton" onclick="login();">Login</button>
+    <button id="logoutButton" style="display: none;" onclick="logout();">Logout</button>
+
     <script type="text/javascript">
+        var secureVaultInstance;
+        var login;
+        var logout;
+
         var checkReady = setInterval(() => {
             if (document.readyState === "complete") {
                 clearInterval(checkReady);
 
-                var secureVaultInstance = secureVaultAPI.getInstance();
+                secureVaultInstance = secureVaultAPI.getInstance();
 
                 secureVaultInstance.connectIdentityProvider({
                     signInRedirectURL: "http://localhost:3000/app", // Application Sign-In request handle URL
@@ -44,11 +52,27 @@
                     scope: [ "openid", "profile" ]
                 });
 
-                secureVaultInstance.signIn();
+                secureVaultInstance.checkSignIn();
 
-                secureVaultInstance.on("signIn", (response) => {
+                login = function() {
+                    secureVaultInstance.signIn();
+                };
+
+                logout = function() {
+                    secureVaultInstance.signOut();
+                };
+
+                secureVaultInstance.on(secureVaultAPI.authHooks.SIGN_IN, (response) => {
                     console.log(response);
                     document.getElementById("name").innerHTML = response.message.username;
+                    document.getElementById("loginButton").style.display = "none";
+                    document.getElementById("logoutButton").style.display = "inline-block";
+                });
+
+                secureVaultInstance.on(secureVaultAPI.authHooks.SIGN_OUT, (response) => {
+                    document.getElementById("name").innerHTML = "Welcome";
+                    document.getElementById("loginButton").style.display = "inline-block";
+                    document.getElementById("logoutButton").style.display = "none";
                 });
 
                 /* secureVaultInstance.httpRequest("http://api.webservice.com/getUser").then((response) => {
