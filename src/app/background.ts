@@ -22,6 +22,7 @@
  * SOFTWARE.
 **/
 
+import { HTTPMethods } from "../models/http";
 import { MessageStatuses, MessageTypes } from "../models/message";
 import { vault } from "./open-id-connect/vault";
 
@@ -116,21 +117,48 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             break;
         case MessageTypes.API_CALL:
-            vaultInstance.httpGet({
-                url: request.body.url 
-            }).then((data) => {
-                    sendResponse({
-                        status: MessageStatuses.SUCCESS,
-                        message: data,
-                        originalRequest: request
+            if (request.body.type === HTTPMethods.GET) {
+                vaultInstance.httpGet({
+                    url: request.body.url
+                }).then((data) => {
+                        sendResponse({
+                            status: MessageStatuses.SUCCESS,
+                            message: data,
+                            originalRequest: request
+                        });
+                    }).catch((error) => {
+                        sendResponse({
+                            status: MessageStatuses.FAILED,
+                            message: error,
+                            originalRequest: request
+                        });
                     });
-                }).catch((error) => {
-                    sendResponse({
-                        status: MessageStatuses.FAILED,
-                        message: error,
-                        originalRequest: request
+            }
+            else if (request.body.type === HTTPMethods.POST) {
+                vaultInstance.httpPost({
+                    url: request.body.url,
+                    payload: request.body.payload
+                }).then((data) => {
+                        sendResponse({
+                            status: MessageStatuses.SUCCESS,
+                            message: data,
+                            originalRequest: request
+                        });
+                    }).catch((error) => {
+                        sendResponse({
+                            status: MessageStatuses.FAILED,
+                            message: error,
+                            originalRequest: request
+                        });
                     });
+            }
+            else {
+                sendResponse({
+                    status: MessageStatuses.FAILED,
+                    message: "Unsupported request method",
+                    originalRequest: request
                 });
+            }
 
             break;
         default:

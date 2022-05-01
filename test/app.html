@@ -33,10 +33,13 @@
     <button id="loginButton" onclick="login();">Login</button>
     <button id="logoutButton" style="display: none;" onclick="logout();">Logout</button>
 
+    <button id="apiGetButton" onclick="doAPIGet();">DO API GET</button>
+
     <script type="text/javascript">
         var secureVaultInstance;
         var login;
         var logout;
+        var doAPIGet;
 
         var checkReady = setInterval(() => {
             if (document.readyState === "complete") {
@@ -47,8 +50,8 @@
                 secureVaultInstance.connectIdentityProvider({
                     signInRedirectURL: "http://localhost:3000/app", // Application Sign-In request handle URL
                     signOutRedirectURL: "http://localhost:3000/app", // Application Sign-out request handle URL
-                    clientID: "", // Application register ID
-                    baseUrl: "https://api.asgardeo.io/t/<org>", // Identity Provider Account Base Path
+                    clientID: "LRk3fArkyPVASjbHfS9MCpkYgaca", // Application register ID
+                    baseUrl: "https://api.asgardeo.io/t/{organization_name}", // Identity Provider Account Base Path
                     scope: [ "openid", "profile" ]
                 });
 
@@ -75,20 +78,33 @@
                     document.getElementById("logoutButton").style.display = "none";
                 });
 
-                /* secureVaultInstance.httpRequest("http://api.webservice.com/getUser").then((response) => {
+                doAPIGet = function() {
+                    secureVaultInstance.httpGet("https://api.asgardeo.io/t/{organization_name}/api/identity/user/v1.0/me").then((response) => {
+                        console.log(response);
+                    }, (error) => {
+                        console.error(error);
+                    });
+                }
+
+                /* secureVaultInstance.httpPost(
+                    "http://api.webservice.com/getUser", 
+                    JSON.stringify({ 
+                        name: "Jake"
+                    })
+                ).then((response) => {
                     console.log(response);
                 }, (error) => {
                     console.error(error);
                 }); */
     
                 /* TODO: Temporally commented for avoid unwanted public API Calls
-                secureVaultInstance.httpRequest("https://api.coindesk.com/v1/bpi/currentprice.json").then((response) => {
+                secureVaultInstance.httpGet("https://api.coindesk.com/v1/bpi/currentprice.json").then((response) => {
                     console.log(response);
                 }, (error) => {
                     console.error(error);
                 });
 
-                secureVaultInstance.httpRequest("https://api.publicapis.org/entries").then((response) => {
+                secureVaultInstance.httpGet("https://api.publicapis.org/entries").then((response) => {
                     console.log(response);
                 }, (error) => {
                     console.error(error);

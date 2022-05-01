@@ -29,6 +29,7 @@ import { uniqueIDGen } from "../../utils/string-utils";
 import { SessionStore } from "../../utils/session-store";
 import { removeAuthorizationCode } from "../../utils/url-utils";
 import { resolvePromise, rejectPromise, until } from "../../utils/promise-utils";
+import { HTTPErrors, HTTPMethods } from "../../models/http";
 
 export class vaultClient {
     private static _instance: vaultClient;
@@ -140,7 +141,7 @@ export class vaultClient {
         });
     }
 
-    public static httpRequest = async (url) => {
+    public static httpGet = async (url) => {
 
         await until(() => !this._initializationTriggered);
 
@@ -152,7 +153,40 @@ export class vaultClient {
                     origin: MessageOrigins.PAGE, 
                     type: MessageTypes.API_CALL,
                     body: {
-                        url: url, 
+                        url: url,
+                        type: HTTPMethods.GET,
+                        httpRequestInstanceID: httpRequestInstanceID
+                    }
+                });
+
+                this.getInstance().addToHTTPCallStack({ 
+                    ["httpRequestInstanceID"]: httpRequestInstanceID,
+                    ["resolve"]: resolve,
+                    ["reject"]: reject
+                });
+            }
+            else {
+                reject("Authorization is required before making secure API requests. " + 
+                    "Make sure secure vault is initialized.");
+            }
+        });
+    }
+
+    public static httpPost = async (url, payload) => {
+
+        await until(() => !this._initializationTriggered);
+
+        return new Promise((resolve, reject) => {
+            if (this._isInitialized) {
+                const httpRequestInstanceID = uniqueIDGen();
+
+                window.postMessage({ 
+                    origin: MessageOrigins.PAGE, 
+                    type: MessageTypes.API_CALL,
+                    body: {
+                        url: url,
+                        type: HTTPMethods.POST,
+                        payload: payload,
                         httpRequestInstanceID: httpRequestInstanceID
                     }
                 });
@@ -241,7 +275,6 @@ export class vaultClient {
                     break;
                 default:
                     return;
-                    // code block
             }
         }
     }

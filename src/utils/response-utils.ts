@@ -22,11 +22,20 @@
  * SOFTWARE.
 **/
 
+import { HTTPErrors, HTTPFetchError } from "../models/http";
+
 export const responseStatus = (response) => {
     if (response.status >= 200 && response.status < 300) {
         return Promise.resolve(response)
-    } else {
-        return Promise.reject(new Error(response.statusText))
+    }
+    else if (response.status >= 300 && response.status < 600) {
+        return Promise.reject({
+            status: response.status,
+            message: HTTPErrors[response.status] || ""
+        });
+    }
+    else {
+        return Promise.reject(new Error(HTTPFetchError))
     }
 }
 

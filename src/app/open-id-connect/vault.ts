@@ -172,13 +172,36 @@ export class vault {
 
     public httpGet = (request) => {
         return new Promise((resolve, reject) => {
-            this._http.get({
-                url: request.url 
-            }).then((data) => {
-                resolve(data);
-            }).catch((error) => {
-                reject(error);
-            });
+            if (this.isAuthenticated()) {
+                this._http.get({
+                    url: request.url 
+                }).then((data) => {
+                    resolve(data);
+                }).catch((error) => {
+                    reject(error);
+                });
+            }
+            else {
+                reject("User is not logged in!");
+            }
+        });
+    }
+
+    public httpPost = (request) => {
+        return new Promise((resolve, reject) => {
+            if (this.isAuthenticated()) {
+                this._http.post({
+                    url: request.url,
+                    payload: request.payload
+                }).then((data) => {
+                    resolve(data);
+                }).catch((error) => {
+                    reject(error);
+                });
+            }
+            else {
+                reject("User is not logged in!");
+            }
         });
     }
 }
