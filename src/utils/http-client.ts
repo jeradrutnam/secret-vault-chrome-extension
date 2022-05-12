@@ -25,14 +25,6 @@
 import { responseStatus, json, isValidResponse } from "../utils/response-utils";
 import { httpRequestObjectInterface, HTTPMethods, HTTPFetchError } from "../models/http";
 
-const getTokenRequestHeaders = (): HeadersInit => {
-    return {
-        Accept: "application/json",
-        "Content-Type": "application/x-www-form-urlencoded"
-    };
-}
-
-
 const FetchCredentialTypes = {
     Include: "include",
     SameOrigin: "same-origin",
@@ -61,14 +53,6 @@ export class httpClient {
     public get = (request: httpRequestObjectInterface) => {
         return new Promise((resolve, reject) => {
 
-            const body: string[] = [];
-
-            body.push(`client_id=${ request.configData.clientID }`);
-            body.push(`token=${ request.accessToken }`);
-            body.push("token_type_hint=access_token");
-
-            // this._headers.append("Authorization", `Bearer ${ request.accessToken }`);
-
             const requestHeaderWithAccessToken = {
                 ...this._headers,
                 "Authorization": `Bearer ${ request.accessToken }`
@@ -77,21 +61,16 @@ export class httpClient {
             const requestHeaders = new Headers(requestHeaderWithAccessToken);
 
             const init = {
-                body: body.join("&"),
                 credentials: request.configData.sendCookiesInRequests
                     ? FetchCredentialTypes.Include as RequestCredentials
                     : FetchCredentialTypes.SameOrigin as RequestCredentials,
                 headers: requestHeaders,
-                method: HTTPMethods.GET,
-                // mode: "cors" as RequestMode,
-                // cache: "default" as RequestCache
+                method: HTTPMethods.GET
             };
 
-            // const requestURL = new Request(request.url, init);
+            const fetchRequest = new Request(request.url, init);
 
-            debugger;
-
-            fetch(request.url, init)
+            fetch(fetchRequest)
                 .then(responseStatus)
                 .then(json)
                 .then((data) => {

@@ -79,11 +79,12 @@
                 });
 
                 doAPIGet = function() {
-                    secureVaultInstance.httpGet("https://api.asgardeo.io/t/jerad/scim2/Me").then((response) => {
-                        console.log(response);
-                    }, (error) => {
-                        console.error(error);
-                    });
+                    secureVaultInstance.httpGet("https://api.asgardeo.io/t/jerad/oauth2/userinfo?schema=openid")
+                        .then((response) => {
+                            console.log(response);
+                        }, (error) => {
+                            console.error(error);
+                        });
                 }
 
                 /* secureVaultInstance.httpPost(

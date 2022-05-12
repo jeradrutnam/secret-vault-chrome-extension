@@ -22,8 +22,43 @@
  * SOFTWARE.
 **/
 
+// import { generateKeyPairSync, privateDecrypt, privateEncrypt } from "crypto";
+
 export class MemoryStore {
     private _data: Map<string, string>;
+    // private _keys() {
+    //     return generateKeyPairSync("rsa", {
+    //         modulusLength: 520,
+    //         publicKeyEncoding: {
+    //             type: "spki",
+    //             format: "pem"
+    //         },
+    //         privateKeyEncoding: {
+    //             type: "pkcs8",
+    //             format: "pem",
+    //             cipher: "aes-256-cbc",
+    //             passphrase: ""
+    //         }
+    //     });
+    // };
+
+    // private _encryptData(data: string) {
+    //     const encrypted = privateEncrypt(
+    //         this._keys().privateKey, Buffer.from(data));
+    
+    //     return encrypted.toString("base64");
+    // }
+
+    // private _decryptData(data: string) {
+    //     const decrypted = privateDecrypt(
+    //         {
+    //             key: this._keys().privateKey,
+    //             passphrase: "",
+    //         },
+    //         Buffer.from(data, "base64"));
+    
+    //     return decrypted.toString();
+    // }
 
     public constructor() {
         this._data = new Map();
@@ -31,9 +66,11 @@ export class MemoryStore {
 
     public async setData(key: string, value: string): Promise<void> {
         this._data.set(key, value);
+        // console.log(this._encryptData(value), value);
     }
 
     public async getData(key: string): Promise<string> {
+        // console.log(this._decryptData(this._data?.get(key) ?? "{}"), this._data?.get(key) ?? "{}");
         return this._data?.get(key) ?? "{}";
     }
 
