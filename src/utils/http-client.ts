@@ -25,9 +25,26 @@
 import { responseStatus, json, isValidResponse } from "../utils/response-utils";
 import { httpRequestObjectInterface, HTTPMethods, HTTPFetchError } from "../models/http";
 
+const getTokenRequestHeaders = (): HeadersInit => {
+    return {
+        Accept: "application/json",
+        "Content-Type": "application/x-www-form-urlencoded"
+    };
+}
+
+
+const FetchCredentialTypes = {
+    Include: "include",
+    SameOrigin: "same-origin",
+    Omit: "omit"
+}
+
 export class httpClient {
     private static _instance: httpClient;
-    private _headers = new Headers();
+    private _headers = {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "http://localhost:3000"
+    };
 
     private constructor() {}
 
@@ -37,23 +54,44 @@ export class httpClient {
         }
 
         this._instance = new httpClient();
-        this.getInstance()._headers.append("Content-Type", "application/json");
 
         return this._instance;
     }
 
     public get = (request: httpRequestObjectInterface) => {
         return new Promise((resolve, reject) => {
-            const init = {
-                method: HTTPMethods.GET,
-                headers: this._headers,
-                mode: "cors" as RequestMode,
-                cache: "default" as RequestCache
+
+            const body: string[] = [];
+
+            body.push(`client_id=${ request.configData.clientID }`);
+            body.push(`token=${ request.accessToken }`);
+            body.push("token_type_hint=access_token");
+
+            // this._headers.append("Authorization", `Bearer ${ request.accessToken }`);
+
+            const requestHeaderWithAccessToken = {
+                ...this._headers,
+                "Authorization": `Bearer ${ request.accessToken }`
             };
 
-            const requestURL = new Request(request.url, init);
+            const requestHeaders = new Headers(requestHeaderWithAccessToken);
 
-            fetch(requestURL)
+            const init = {
+                body: body.join("&"),
+                credentials: request.configData.sendCookiesInRequests
+                    ? FetchCredentialTypes.Include as RequestCredentials
+                    : FetchCredentialTypes.SameOrigin as RequestCredentials,
+                headers: requestHeaders,
+                method: HTTPMethods.GET,
+                // mode: "cors" as RequestMode,
+                // cache: "default" as RequestCache
+            };
+
+            // const requestURL = new Request(request.url, init);
+
+            debugger;
+
+            fetch(request.url, init)
                 .then(responseStatus)
                 .then(json)
                 .then((data) => {

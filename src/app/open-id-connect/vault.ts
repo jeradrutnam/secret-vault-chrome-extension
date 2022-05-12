@@ -28,6 +28,7 @@ import { MemoryStore } from "../../utils/memory-store";
 import { CryptoUtils } from "../../utils/crypto-utils";
 import { httpClient } from "../../utils/http-client";
 import { ConfigInterface } from "../../models/config";
+import { HTTPAuthorizationRequiredError, HTTPNoAuthentionSessionError } from "../../models/http";
 
 export class vault {
     private static _instance: vault;
@@ -76,8 +77,8 @@ export class vault {
 		return this.getInstance()._isInitialized;
     }
 
-    public isAuthenticated = (): Promise<boolean> => {
-        return this._authClient.isAuthenticated();
+    public isAuthenticated = async (): Promise<boolean> => {
+        return await this._authClient.isAuthenticated();
     };
 
     private getDecodedIDToken = async (): Promise<DecodedIDTokenPayload> => {
@@ -113,9 +114,9 @@ export class vault {
             const config = await this._dataLayer.getConfigData();
 
             const urlObject: URL = new URL(requestBody.pageUrl);
-            const code: string = urlObject.searchParams.get('code') ?? "";
-            const state: string = urlObject.searchParams.get('state') ?? "";
-            const session_state: string = urlObject.searchParams.get('session_state') ?? "";
+            const code: string = urlObject.searchParams.get("code") ?? "";
+            const state: string = urlObject.searchParams.get("state") ?? "";
+            const session_state: string = urlObject.searchParams.get("session_state") ?? "";
             const pkce: string = (state !== "") ? AuthenticationUtils.extractPKCEKeyFromStateParam(state) : "";
             
             if (code !== "") {
@@ -151,30 +152,38 @@ export class vault {
         });
     }
 
-    public signOut = () => {
+    public signOut = async () => {
+        const isUserAuthenticated = await this.isAuthenticated();
+
         return new Promise(async (resolve, reject) => {
-            if (this.isAuthenticated()) {
+            if (isUserAuthenticated) {
                 this._authClient.getSignOutURL()
                     .then(async (url) => {
                         resolve({
                             url: url,
-                            isAuthenticated: this.isAuthenticated()
+                            isAuthenticated: isUserAuthenticated
                         });
                     }).catch((error) => {
                         reject(error);
                     });
             }
             else {
-                reject("User is not logged in!"); 
+                reject(HTTPNoAuthentionSessionError);
             }
         });
     }
 
-    public httpGet = (request) => {
+    public httpGet = async (request) => {
+        const isUserAuthenticated = await this.isAuthenticated();
+        const config = await this._dataLayer.getConfigData();
+        const accessToken = (await this._dataLayer.getSessionData()).access_token;
+
         return new Promise((resolve, reject) => {
-            if (this.isAuthenticated()) {
+            if (isUserAuthenticated) {
                 this._http.get({
-                    url: request.url 
+                    configData: config,
+                    accessToken: accessToken,
+                    url: request.url
                 }).then((data) => {
                     resolve(data);
                 }).catch((error) => {
@@ -182,14 +191,16 @@ export class vault {
                 });
             }
             else {
-                reject("User is not logged in!");
+                reject(HTTPAuthorizationRequiredError);
             }
         });
     }
 
-    public httpPost = (request) => {
+    public httpPost = async (request) => {
+        const isUserAuthenticated = await this.isAuthenticated();
+
         return new Promise((resolve, reject) => {
-            if (this.isAuthenticated()) {
+            if (isUserAuthenticated) {
                 this._http.post({
                     url: request.url,
                     payload: request.payload
@@ -200,7 +211,7 @@ export class vault {
                 });
             }
             else {
-                reject("User is not logged in!");
+                reject(HTTPAuthorizationRequiredError);
             }
         });
     }

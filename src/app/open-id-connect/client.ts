@@ -29,7 +29,7 @@ import { uniqueIDGen } from "../../utils/string-utils";
 import { SessionStore } from "../../utils/session-store";
 import { removeAuthorizationCode } from "../../utils/url-utils";
 import { resolvePromise, rejectPromise, until } from "../../utils/promise-utils";
-import { HTTPErrors, HTTPMethods } from "../../models/http";
+import { HTTPAuthorizationRequiredError, HTTPErrors, HTTPMethods } from "../../models/http";
 
 export class vaultClient {
     private static _instance: vaultClient;
@@ -198,8 +198,7 @@ export class vaultClient {
                 });
             }
             else {
-                reject("Authorization is required before making secure API requests. " + 
-                    "Make sure secure vault is initialized.");
+                reject(HTTPAuthorizationRequiredError + ". Make sure secure vault is initialized.");
             }
         });
     }

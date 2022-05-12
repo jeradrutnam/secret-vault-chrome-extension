@@ -23,6 +23,8 @@
 **/
 
 export interface httpRequestObjectInterface {
+    accessToken: string;
+    configData: any;
     header?: string;
     payload?: string;
     url: string;
@@ -36,6 +38,10 @@ export const HTTPMethods = {
 export type HTTPMethodType =
     | typeof HTTPMethods.GET
     | typeof HTTPMethods.POST;
+
+export const HTTPFetchError = "Cannot reach the endpoint";
+export const HTTPNoAuthentionSessionError = "No authentication session";
+export const HTTPAuthorizationRequiredError = "Authorization is required before making secure API requests";
 
 export const HTTPErrors = {
     400: "BadRequest",
@@ -80,5 +86,3 @@ export const HTTPErrors = {
     510: "NotExtended",
     511: "NetworkAuthenticationRequired"
 }
-
-export const HTTPFetchError = "Cannot reach the endpoint";

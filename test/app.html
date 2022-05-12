@@ -51,7 +51,7 @@
                     signInRedirectURL: "http://localhost:3000/app", // Application Sign-In request handle URL
                     signOutRedirectURL: "http://localhost:3000/app", // Application Sign-out request handle URL
                     clientID: "LRk3fArkyPVASjbHfS9MCpkYgaca", // Application register ID
-                    baseUrl: "https://api.asgardeo.io/t/{organization_name}", // Identity Provider Account Base Path
+                    baseUrl: "https://api.asgardeo.io/t/jerad", // Identity Provider Account Base Path
                     scope: [ "openid", "profile" ]
                 });
 
@@ -79,7 +79,7 @@
                 });
 
                 doAPIGet = function() {
-                    secureVaultInstance.httpGet("https://api.asgardeo.io/t/{organization_name}/api/identity/user/v1.0/me").then((response) => {
+                    secureVaultInstance.httpGet("https://api.asgardeo.io/t/jerad/scim2/Me").then((response) => {
                         console.log(response);
                     }, (error) => {
                         console.error(error);
