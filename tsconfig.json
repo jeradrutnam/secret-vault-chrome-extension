@@ -4,7 +4,8 @@
         "target": "es2017",
         "module": "esnext",
         "jsx": "react",
-        "moduleResolution": "Node"
+        "moduleResolution": "Node",
+        "allowSyntheticDefaultImports": true
     },
     "exclude": [
         "node_modules",
