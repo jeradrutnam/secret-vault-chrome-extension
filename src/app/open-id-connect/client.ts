@@ -239,9 +239,6 @@ export class vaultClient {
                 case MessageTypes.LOGOUT:
 
                     if (message.data.response.status === MessageStatuses.SUCCESS) {
-                        this.getInstance()._sessionStore.removeData("signInInit");
-                        this.getInstance()._sessionStore.removeData("signOutInit");
-       
                         window.location.href = message.data.response.message.url;
     
                         this._onSignOutCallback("Logout successfully!");
@@ -249,6 +246,9 @@ export class vaultClient {
                     else {
                         console.error(message.data.response.message);
                     }
+
+                    this.getInstance()._sessionStore.removeData("signInInit");
+                    this.getInstance()._sessionStore.removeData("signOutInit");
 
                     break;
                 case MessageTypes.API_CALL:
