@@ -26,6 +26,11 @@ import { HTTPMethods } from "../models/http";
 import { MessageStatuses, MessageTypes } from "../models/message";
 import { vault } from "./open-id-connect/vault";
 
+/**
+ * Method to get current chrome tab
+ * 
+ * @returns Tab Details
+ */
 const getCurrentTab = async () => {
     let queryOptions = { active: true, currentWindow: true };
     let [tab] = await chrome.tabs.query(queryOptions);
@@ -35,6 +40,9 @@ const getCurrentTab = async () => {
 
 let tab = await getCurrentTab();
 
+/**
+ * Event listener for on tab is activated
+ */
 chrome.tabs.onActivated.addListener(() => {
     if (/^http:\/\/localhost:3000/.test(tab.url)) {
         chrome.scripting.executeScript({
@@ -44,6 +52,10 @@ chrome.tabs.onActivated.addListener(() => {
     }
 });
 
+/**
+ * Background event listener to catch the content messages and process those through the vault
+ * and post the results back to the content side
+ */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const vaultInstance = vault.getInstance();
 

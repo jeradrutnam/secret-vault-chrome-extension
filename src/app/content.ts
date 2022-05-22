@@ -27,8 +27,8 @@ import { MessageOrigins } from "../models/message";
 /**
  * Method to inject client scripts to the web application
  * 
- * @param file_path 
- * @param tag 
+ * @param file_path Path of the injected script file
+ * @param tag HTML tag where the script should be injected
  */
 const injectScript = (file_path, tag) => {
     const node = document.getElementsByTagName(tag)[0];
