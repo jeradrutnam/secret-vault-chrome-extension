@@ -22,6 +22,11 @@
  * SOFTWARE.
 **/
 
+/**
+ * Method to generate renadomized UUID string value
+ * 
+ * @returns Random UUID
+ */
 export const uniqueIDGen = (): string => {
     return "UUID" + Math.floor(Math.random() * 100) + Date.now();
 }

@@ -22,6 +22,9 @@
  * SOFTWARE.
 **/
 
+/**
+ * Method to remove authorization code from the URL
+ */
 export const removeAuthorizationCode = (): void => {
     const url = location.href;
 

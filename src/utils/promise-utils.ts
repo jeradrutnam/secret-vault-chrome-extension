@@ -22,6 +22,16 @@
  * SOFTWARE.
 **/
 
+/**
+ * Method to wait until the provided condition is successful
+ * 
+ * @param condFunc conditional boolean value
+ * @returns Promise resolve status
+ * 
+ * Usage:
+ * 
+ * await until(() => (isSomeValue == true));
+ */
 export const until = async (condFunc: () => boolean) => {
     return new Promise((resolve) => {
         if (condFunc()) {
@@ -36,10 +46,22 @@ export const until = async (condFunc: () => boolean) => {
     });
 };
 
+/**
+ * Method to resolve promise
+ * 
+ * @param resolve Promise resolve
+ * @param responseMessage Resolve message
+ */
 export const resolvePromise = (resolve, responseMessage) => {
     resolve(responseMessage);
 };
 
+/**
+ * Method to reject promise
+ * 
+ * @param reject Promise reject
+ * @param errorMessage Reject error message
+ */
 export const rejectPromise = (reject, errorMessage) => {
     reject(errorMessage);
 };

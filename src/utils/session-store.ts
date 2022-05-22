@@ -26,6 +26,13 @@ export class SessionStore {
 
     public constructor() { }
 
+    /**
+     * Set data method
+     * 
+     * @param key Key for the value that needs to store
+     * @param value Value that needs to store
+     * @returns Promise with the status or error
+     */
     public async setData(key: string, value: string): Promise<void> {
         return new Promise((resolve, reject) => {
             try {
@@ -37,6 +44,12 @@ export class SessionStore {
         });
     }
 
+    /**
+     * Get data method
+     * 
+     * @param key Key of the value that need to retrive 
+     * @returns Promise with the value or error
+     */
     public async getData(key: string): Promise<string> {
         return new Promise((resolve, reject) => {
             try {
@@ -47,6 +60,12 @@ export class SessionStore {
         });
     }
 
+    /**
+     * Remove data method
+     * 
+     * @param key Key of the value that need to remove 
+     * @returns Promise with the status or error
+     */
     public async removeData(key: string): Promise<void> {
         return new Promise((resolve, reject) => {
             try {

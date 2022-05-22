@@ -50,6 +50,12 @@ export class httpClient {
         return this._instance;
     }
 
+    /**
+     * HTTP GET method
+     * 
+     * @param request Request object
+     * @returns Promise object with result or error
+     */
     public get = (request: httpRequestObjectInterface) => {
         return new Promise((resolve, reject) => {
 
@@ -86,6 +92,12 @@ export class httpClient {
         });
     }
 
+    /**
+     * HTTP POST method
+     * 
+     * @param request Request object
+     * @returns Promise object with result or error
+     */
     public post = (request: httpRequestObjectInterface) => {
         return new Promise((resolve, reject) => {
             const init = {

@@ -24,6 +24,12 @@
 
 import { HTTPErrors, HTTPFetchError } from "../models/http";
 
+/**
+ * Method to check fetched data response status
+ * 
+ * @param response Fetch response object
+ * @returns 
+ */
 export const responseStatus = (response) => {
     if (response.status >= 200 && response.status < 300) {
         return Promise.resolve(response)
@@ -39,10 +45,22 @@ export const responseStatus = (response) => {
     }
 }
 
+/**
+ * Method to get JSON object of the response
+ * 
+ * @param response Fetch response
+ * @returns JSON object
+ */
 export const json = (response) => {
-    return response.json()
+    return response.json();
 }
 
+/**
+ * Method to check if the response data is a valid JSON
+ * 
+ * @param value 
+ * @returns 
+ */
 export const isValidResponse = (value) => {
     if (value == typeof(String)) {
         try {
