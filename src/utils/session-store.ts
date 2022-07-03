@@ -47,7 +47,7 @@ export class SessionStore {
     /**
      * Get data method
      * 
-     * @param key Key of the value that need to retrive 
+     * @param key Key of the value that need to retrieve 
      * @returns Promise with the value or error
      */
     public async getData(key: string): Promise<string> {

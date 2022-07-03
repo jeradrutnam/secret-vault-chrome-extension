@@ -23,7 +23,7 @@
 **/
 
 /**
- * Method to generate renadomized UUID string value
+ * Method to generate randomized UUID string value
  * 
  * @returns Random UUID
  */

@@ -30,6 +30,12 @@ export interface httpRequestObjectInterface {
     url: string;
 }
 
+export interface httpCallStackInterface {
+    ["httpRequestInstanceID"]: string,
+    ["resolve"]: any,
+    ["reject"]: any
+}
+
 export const HTTPMethods = {
     GET: "GET",
     POST: "POST"

@@ -22,48 +22,46 @@
  * SOFTWARE.
 **/
 
-import { AESCryptoUtils } from "./aes-crypto-utils";
-import { uniqueIDGen } from "./string-utils";
+import * as CryptoJS from 'crypto-js';
 
-export class MemoryStore {
-    private _data: Map<string, string>;
-    private _cryptoUtils = new AESCryptoUtils();
-    private _saltKey: string = uniqueIDGen();
+const cfg = {
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7
+};
 
-    public constructor() {
-        this._data = new Map();
+export class AESCryptoUtils {
+
+    /*
+     * Encrypt a derived hd private key with a given pin and return it in Base64 form
+     */
+    public encryptAES(text, key) {
+        return CryptoJS.AES.encrypt(text, key).toString();
     }
 
     /**
-     * Set data method
+     * Decrypt an encrypted message
      * 
-     * @param key Key for the value that needs to store
-     * @param value Value that needs to store
+     * @param encryptedBase64 encrypted data in base64 format
+     * @param key The secret key
+     * @return The decrypted content
      */
-    public async setData(key: string, value: string): Promise<void> {
-        await this._data.set(key, this._cryptoUtils.encryptAES(value, this._saltKey));
-    }
+    public decryptAES(encryptedBase64, key) {
 
-    /**
-     * Get data method
-     * 
-     * @param key Key of the value that need to retrieve 
-     * @returns returns a string value
-     */
-    public async getData(key: string): Promise<string> {
-        if (this._data?.get(key)) {
-            return this._cryptoUtils.decryptAES(this._data.get(key), this._saltKey);
+        const decrypted = CryptoJS.AES.decrypt(encryptedBase64, key);
+
+        if (decrypted) {
+            try {
+                const str = decrypted.toString(CryptoJS.enc.Utf8);
+
+                if (str.length > 0) {
+                    return str;
+                } else {
+                    return 'error 1';
+                }
+            } catch (e) {
+                return 'error 2';
+            }
         }
-   
-        return "{}"; 
-    }
-
-    /**
-     * Remove data method
-     * 
-     * @param key Key of the value that need to remove 
-     */
-    public async removeData(key: string): Promise<void> {
-        this._data.delete(key);
-    }
+        return 'error 3';
+    };
 }

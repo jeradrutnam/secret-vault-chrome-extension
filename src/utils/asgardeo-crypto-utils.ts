@@ -23,13 +23,13 @@
 **/
 
 import { Buffer } from "buffer";
-import { CryptoUtils as AuthJSCryptoUtils, JWKInterface } from "@asgardeo/auth-js";
 import base64url from "base64url";
 import sha256 from "fast-sha256";
 import { createLocalJWKSet, jwtVerify } from "jose";
 import randombytes from "randombytes";
+import { CryptoUtils as AuthJSCryptoUtils, JWKInterface } from "@asgardeo/auth-js";
 
-export class CryptoUtils implements AuthJSCryptoUtils<Buffer | string> {
+export class AsgardeoCryptoUtils implements AuthJSCryptoUtils<Buffer | string> {
     public base64URLEncode(value: Buffer | string): string {
         return base64url.encode(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
     }

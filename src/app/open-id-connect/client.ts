@@ -22,15 +22,18 @@
  * SOFTWARE.
 **/
 
-import { MessageStatuses, MessageTypes, MessageOrigins } from "../../models/message";
+import { MessageStatuses, MessageTypes, MessageOrigins, MessageType } from "../../models/message";
 import { ConfigInterface } from "../../models/config";
-import { Hooks } from "../../models/hooks";
+import { Hooks, HookType } from "../../models/hooks";
 import { uniqueIDGen } from "../../utils/string-utils";
 import { SessionStore } from "../../utils/session-store";
 import { removeAuthorizationCode } from "../../utils/url-utils";
 import { resolvePromise, rejectPromise, until } from "../../utils/promise-utils";
-import { HTTPAuthorizationRequiredError, HTTPErrors, HTTPMethods } from "../../models/http";
+import { HTTPAuthorizationRequiredError, httpCallStackInterface, HTTPMethods } from "../../models/http";
 
+/**
+ * Vault Client Class
+ */
 export class vaultClient {
     private static _instance: vaultClient;
     private _authConfig: ConfigInterface;
@@ -43,16 +46,32 @@ export class vaultClient {
 
     private constructor() {}
 
+    /**
+     * Method to get the HTTP requests calls list
+     * 
+     * @returns httpCallStack
+     */
     private getHTTPCallStack = () => {
 
         return this._httpCallStack;
     }
 
-    private addToHTTPCallStack = (apiRequest) => {
+    /**
+     * Method to add HTTP request reference to the stack
+     * 
+     * @param apiRequest Object with API request reference ID and request promise resolve and reject
+     * @returns httpCallStack
+     */
+    private addToHTTPCallStack = (apiRequest: httpCallStackInterface) => {
 
         return this._httpCallStack.push(apiRequest);
     }
 
+    /**
+     * Method the returns the singleton instance of the Vault Client
+     * 
+     * @returns vaultClientInstance
+     */
     public static getInstance = () => {
 
         if (this._instance) {
@@ -64,6 +83,11 @@ export class vaultClient {
         return this._instance;
     }
 
+    /**
+     * Method to request the vault client to connect to an IdP with the given config object
+     * 
+     * @param config required configuration object for IdP connection
+     */
     public static connectIdentityProvider = (config: ConfigInterface) => {
 
         this._initializationTriggered = true;
@@ -79,11 +103,19 @@ export class vaultClient {
         });
     }
 
+    /**
+     * Method to get the vault initialization status
+     * 
+     * @returns isInitialized
+     */
     public static isInitialized = () => {
 
 		return this._isInitialized;
     }
 
+    /**
+     * Method to check user signed in status
+     */
     public static checkSignIn = async () => {
 
         if (this.isInitialized) {
@@ -99,6 +131,9 @@ export class vaultClient {
         }
     }
 
+    /**
+     * Method to user sign in to Identity Provider
+     */
     public static signIn = async () => {
 
         await until(() => !this._initializationTriggered);
@@ -121,6 +156,9 @@ export class vaultClient {
         });
     }
 
+    /**
+     * Method to user sign out to Identity Provider
+     */
     public static signOut = async () => {
 
         await until(() => !this._initializationTriggered);
@@ -141,6 +179,12 @@ export class vaultClient {
         });
     }
 
+    /**
+     * Method to do http get requests after a successful sign in
+     * 
+     * @param url API Endpoint URL
+     * @returns Promise with the response
+     */
     public static httpGet = async (url) => {
 
         await until(() => !this._initializationTriggered);
@@ -172,6 +216,12 @@ export class vaultClient {
         });
     }
 
+    /**
+     * Method to do http post requests after a successful sign in
+     * 
+     * @param url API Endpoint URL
+     * @returns Promise with the response
+     */
     public static httpPost = async (url, payload) => {
 
         await until(() => !this._initializationTriggered);
@@ -203,6 +253,11 @@ export class vaultClient {
         });
     }
 
+    /**
+     * Method to handle responses from the background script of the extension
+     * 
+     * @param message Message response from the extension background script
+     */
     public static handleResponseMessage = (message) => {
 
         if (message.data.origin && message.data.origin == MessageOrigins.BACKGROUND) {
@@ -278,7 +333,13 @@ export class vaultClient {
         }
     }
 
-    public static on = async (hook, callback?) => {
+    /**
+     * Method to handle callbacks on a successful sign in or sign out
+     * 
+     * @param hook When to trigger the call back
+     * @param callback Function to trigger upon the hook triggered
+     */
+    public static on = async (hook: HookType, callback?: () => {}) => {
         
         await until(() => !this._initializationTriggered);
 

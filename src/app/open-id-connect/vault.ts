@@ -25,7 +25,7 @@
 import { AsgardeoAuthClient, AuthenticationUtils, BasicUserInfo, DecodedIDTokenPayload } from "@asgardeo/auth-js";
 import { ChromeStore } from "../../utils/chrome-store";
 import { MemoryStore } from "../../utils/memory-store";
-import { CryptoUtils } from "../../utils/crypto-utils";
+import { AsgardeoCryptoUtils } from "../../utils/asgardeo-crypto-utils";
 import { httpClient } from "../../utils/http-client";
 import { ConfigInterface } from "../../models/config";
 import { HTTPAuthorizationRequiredError, HTTPNoAuthentionSessionError } from "../../models/http";
@@ -57,7 +57,7 @@ export class vault {
         return new Promise((resolve, reject) => {
             try {
                 this._storage = new MemoryStore();
-                this._cryptoUtils = new CryptoUtils();
+                this._cryptoUtils = new AsgardeoCryptoUtils();
                 this._http = httpClient.getInstance();
                 this._authConfig = config;
                 this._authClient = new AsgardeoAuthClient(this._storage, this._cryptoUtils);
