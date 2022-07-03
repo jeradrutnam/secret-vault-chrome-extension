@@ -30,6 +30,9 @@ import { httpClient } from "../../utils/http-client";
 import { ConfigInterface } from "../../models/config";
 import { HTTPAuthorizationRequiredError, HTTPNoAuthentionSessionError } from "../../models/http";
 
+/**
+ * Vault Class
+ */
 export class vault {
     private static _instance: vault;
     private _authConfig: ConfigInterface;
@@ -43,6 +46,11 @@ export class vault {
 
     private constructor() {}
 
+    /**
+     * Method the returns the singleton instance of the Vault
+     * 
+     * @returns vaultInstance
+     */
     public static getInstance = () => {
         if (this._instance) {
             return this._instance;
@@ -53,6 +61,12 @@ export class vault {
         return this._instance;
     }
 
+    /**
+     * Vault initialization method
+     * 
+     * @param config Vault config object that has the Identity Provider configuration
+     * @returns 
+     */
     public initialize = (config: ConfigInterface) => {
         return new Promise((resolve, reject) => {
             try {
@@ -73,22 +87,43 @@ export class vault {
         });
     }
 
+    /**
+     * Method to get the vault initialization status
+     * 
+     * @returns true or false
+     */
     public static isInitialized = () => {
 		return this.getInstance()._isInitialized;
     }
 
+    /**
+     * Method to get the user authenticated status
+     * 
+     * @returns true or false
+     */
     public isAuthenticated = async (): Promise<boolean> => {
         return await this._authClient.isAuthenticated();
     };
 
-    private getDecodedIDToken = async (): Promise<DecodedIDTokenPayload> => {
-        return await this._authClient.getDecodedIDToken();
-    };
-
+    /**
+     * Method to get user's information
+     * 
+     * @returns User's information
+     */
     private getBasicUserInfo = async (): Promise<BasicUserInfo> => {
         return await this._authClient.getBasicUserInfo();
     };
 
+    /**
+     * Method to request for an Access Token
+     * 
+     * @param config Configuration object
+     * @param code Authorization Code
+     * @param session_state Session state
+     * @param state State value
+     * @param pkce PKCE key
+     * @returns Promise with the user's basic information
+     */
     private requestAccessToken = async (config, code, session_state, state, pkce) => {
         if (pkce && config.enablePKCE) {
             let pckeCode = await this._chromeStore.getData(pkce);
@@ -109,6 +144,12 @@ export class vault {
         });
     }
 
+    /**
+     * Method to do sign in
+     * 
+     * @param requestBody Sign In request object receives from the client
+     * @returns Promise with sign in return status 
+     */
     public signIn = (requestBody) => {
         return new Promise(async (resolve, reject) => {
             const config = await this._dataLayer.getConfigData();
@@ -152,6 +193,11 @@ export class vault {
         });
     }
 
+    /**
+     * Method to do sign out
+     * 
+     * @returns Promise with sign out return status 
+     */
     public signOut = async () => {
         const isUserAuthenticated = await this.isAuthenticated();
 
@@ -173,6 +219,12 @@ export class vault {
         });
     }
 
+    /**
+     * HTTP get method
+     * 
+     * @param request Request object
+     * @returns HTTP response or error
+     */
     public httpGet = async (request) => {
         const isUserAuthenticated = await this.isAuthenticated();
         const config = await this._dataLayer.getConfigData();
@@ -196,6 +248,12 @@ export class vault {
         });
     }
 
+    /**
+     * HTTP post method
+     * 
+     * @param request Request object
+     * @returns HTTP response or error
+     */
     public httpPost = async (request) => {
         const isUserAuthenticated = await this.isAuthenticated();
 

@@ -31,6 +31,9 @@ const FetchCredentialTypes = {
     Omit: "omit"
 }
 
+/**
+ * HTTP Client class
+ */
 export class httpClient {
     private static _instance: httpClient;
     private _headers = {
@@ -40,6 +43,11 @@ export class httpClient {
 
     private constructor() {}
 
+    /**
+     * Method the returns the singleton instance of the HTTP Client
+     * 
+     * @returns HTTP Client instance
+     */
     public static getInstance = () => {
         if (this._instance) {
             return this._instance;

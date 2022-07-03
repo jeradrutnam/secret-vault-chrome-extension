@@ -47,6 +47,32 @@ export class vaultClient {
     private constructor() {}
 
     /**
+     * Method the returns the singleton instance of the Vault Client
+     * 
+     * @returns vaultClientInstance
+     */
+    public static getInstance = () => {
+
+        if (this._instance) {
+            return this._instance;
+        }
+
+        this._instance = new vaultClient();
+
+        return this._instance;
+    }
+
+    /**
+     * Method to get the vault initialization status
+     * 
+     * @returns true or false
+     */
+    public static isInitialized = () => {
+
+		return this._isInitialized;
+    }
+
+    /**
      * Method to get the HTTP requests calls list
      * 
      * @returns httpCallStack
@@ -68,22 +94,6 @@ export class vaultClient {
     }
 
     /**
-     * Method the returns the singleton instance of the Vault Client
-     * 
-     * @returns vaultClientInstance
-     */
-    public static getInstance = () => {
-
-        if (this._instance) {
-            return this._instance;
-        }
-
-        this._instance = new vaultClient();
-
-        return this._instance;
-    }
-
-    /**
      * Method to request the vault client to connect to an IdP with the given config object
      * 
      * @param config required configuration object for IdP connection
@@ -101,16 +111,6 @@ export class vaultClient {
                 config: this.getInstance()._authConfig
             }
         });
-    }
-
-    /**
-     * Method to get the vault initialization status
-     * 
-     * @returns isInitialized
-     */
-    public static isInitialized = () => {
-
-		return this._isInitialized;
     }
 
     /**
