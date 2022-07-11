@@ -72,7 +72,6 @@ XMLHttpRequest.prototype.setRequestHeader = function(key, value) {
     pureSetRequestHeader.call(this, key, value);
 };
 
-
 /**
  * Poll and try steal accessToken from the sessionStorage or localStorage
  */

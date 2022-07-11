@@ -22,9 +22,43 @@
  * SOFTWARE.
 **/
 
+import { Button, Content, FlexboxGrid, Panel } from "rsuite";
+import HomeImage from "../../assets/images/home-image.png";
+import { useAuthContext } from "../auth/auth-context";
+
+const styles = {
+    titleStyle: {
+        marginBottom: 10,
+        align: "center"
+    },
+    subTitleStyle: {
+        display: "block",
+        marginBottom: 50,
+        TextAlign: "center"
+    },
+    imageStyles: {
+        width: 350,
+        marginBottom: 20
+    }
+}
+
 export const LoginContent = () => {
+
+    const { signIn } = useAuthContext();
+
     return (
-        <div>
-        </div>
+        <Content className="text-center">
+            <FlexboxGrid justify="center" align="middle" className="middle-panel">
+                <FlexboxGrid.Item colspan={12}>
+                    <h3 style={styles.titleStyle}>Welcome to Currency Converter !</h3>
+                    <span style={styles.subTitleStyle}>Please login to use the app</span>
+                    <Panel>
+                        <img src={HomeImage} alt="Home page image" style={styles.imageStyles} />
+                        <br /><br />
+                        <Button appearance="primary" onClick={ signIn }>Login with Asgardeo</Button>
+                    </Panel>
+                </FlexboxGrid.Item>
+            </FlexboxGrid>
+        </Content>
     );
 };

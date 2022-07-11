@@ -22,13 +22,29 @@
  * SOFTWARE.
 **/
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { until } from "./helpers";
+import { createContext, useContext, useEffect, useState } from "react";
+import { until } from "./async-utils";
+
+interface AuthSate {
+    username: string;
+}
+
+interface AuthContextInterface {
+    checkSignIn: () => void;
+    secureFetch: (endpoint: string) => Promise<any>;
+    signIn: () => Promise<any>;
+    signOut: () => Promise<any>;
+    state: AuthSate | null;
+}
+
+const defaultState = {
+    username: ""
+}
 
 /**
  * Authentication Context to hold global states in react components.
  */
-const AuthContext = createContext({});
+const AuthContext = createContext<any | null>(null);
 
 let secureVaultInstance: any;
 

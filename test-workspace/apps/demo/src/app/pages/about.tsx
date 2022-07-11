@@ -37,8 +37,10 @@ export const AboutContent = () => {
                         <a href="https://github.com/jeradrutnam/secret-vault-chrome-extension/blob/main/LICENSE" target="_blank"> LICENSE.md </a>
                         file for further details.
                         <br /><br />
+                        Home Page Illustration: <a href='https://www.freepik.com/vectors/foreign-exchange'>(Foreign exchange vector) created by redgreystock - www.freepik.com</a>
+                        <br /><br />
                         Thank you,<br />
-                        Author: Jerad Rutnam
+                        Jerad Rutnam
                     </Panel>
                 </FlexboxGrid.Item>
             </FlexboxGrid>

@@ -22,7 +22,6 @@
  * SOFTWARE.
 **/
 
-import { forwardRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Avatar, Header, Nav, Navbar } from "rsuite";
 import Layout from './layouts/layout';
@@ -30,8 +29,13 @@ import { HomeContent } from './pages/home';
 import { AboutContent } from './pages/about';
 import './app.global.less';
 import Logo from '../assets/images/logo.png';
+import { ProtectedRoute } from "./auth/protected-route";
+import { useAuthContext } from "./auth/auth-context";
 
 export const App = ({...props}) => {
+
+    const { state, signOut } = useAuthContext();
+
     return (
         <Router>
             <Header>
@@ -41,20 +45,28 @@ export const App = ({...props}) => {
                         <Nav.Item as={Link} to="/">Home</Nav.Item>
                         <Nav.Item as={Link} to="/about">About</Nav.Item>
                     </Nav>
-                    <Nav pullRight>
-                        <Nav.Item>
-                            <span className="logged-in-user-name">Jerad Rutnam</span>
-                            <Avatar
-                                circle
-                                src="https://avatars.githubusercontent.com/u/7569427?v=4"
-                                alt="Logged in user image" />
-                        </Nav.Item>
-                    </Nav>
+                    { state?.username &&
+                        <Nav pullRight>
+                            <Nav.Menu title={
+                                <>
+                                    <span className="logged-in-user-name">{ state?.username }</span>
+                                    <Avatar
+                                        circle
+                                        src="https://avatars.githubusercontent.com/u/7569427?v=4"
+                                        alt="Logged in user image" />
+                                </>
+                            }>
+                                <Nav.Item onClick={ signOut }>Logout</Nav.Item>
+                            </Nav.Menu>
+                        </Nav>
+                    }
                 </Navbar>
             </Header>
             <Layout>
                 <Routes>
-                    <Route path="/" element={<HomeContent />} />
+                    <Route path="/" element={<ProtectedRoute />}>
+                        <Route path="/" element={<HomeContent/>}/>
+                    </Route>
                     <Route path="/about" element={<AboutContent />} />
                 </Routes>
             </Layout>
