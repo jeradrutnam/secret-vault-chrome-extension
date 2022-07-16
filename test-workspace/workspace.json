@@ -1,9 +1,10 @@
 {
-    "$schema": "./node_modules/nx/schemas/workspace-schema.json",
-    "version": 2,
-    "projects": {
-        "demo": "apps/demo",
-        "demo2": "apps/demo2",
-        "demo-e2e": "apps/demo-e2e"
-    }
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json",
+  "version": 2,
+  "projects": {
+    "currency-convert": "libs/currency-convert",
+    "demo": "apps/demo",
+    "demo-e2e": "apps/demo-e2e",
+    "demo2": "apps/demo2"
+  }
 }

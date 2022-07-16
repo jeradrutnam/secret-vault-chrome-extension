@@ -37,7 +37,7 @@ import {
     Stack
 } from "rsuite";
 import ArrowRightLineIcon from '@rsuite/icons/ArrowRightLine';
-import { convertUSDToLKR } from '../usd-to-lkr';
+import { convertUSDToLKR } from '@test-workspace/currency-convert';
 import USD from '../../assets/images/flags/usd.png';
 import LKR from '../../assets/images/flags/lkr.png';
 import { useAuthContext } from "@asgardeo/auth-react";
@@ -45,8 +45,8 @@ import { useAuthContext } from "@asgardeo/auth-react";
 export const HomeContent = () => {
     const USDRate = 362.84;
 
-    const [ USDValue, setUSDValue ] = useState(1);
-    const [ LKRValue, setLKRValue ] = useState(USDRate);
+    const [ USDValue, setUSDValue ] = useState<number>(1);
+    const [ LKRValue, setLKRValue ] = useState<number>(USDRate);
     const [ errorVisible, setErrorVisible ] = useState(false);
     const { httpRequest } = useAuthContext();
 
@@ -60,7 +60,7 @@ export const HomeContent = () => {
 
         setErrorVisible(false);
         setUSDValue(e);
-        e ? setLKRValue(convertUSDToLKR(e, USDRate).toFixed(2)) : setLKRValue(0);
+        e ? setLKRValue(parseFloat(convertUSDToLKR(e, USDRate).toFixed(2))) : setLKRValue(0);
     };
 
     const errorStyles = (errorVisible: boolean) => {
