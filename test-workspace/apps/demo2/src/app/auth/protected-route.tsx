@@ -22,30 +22,20 @@
  * SOFTWARE.
 **/
 
-import { StrictMode } from 'react';
-import * as ReactDOM from 'react-dom/client';
-import { CustomProvider } from 'rsuite';
-import { AuthProvider } from "./app/auth/auth-context";
-import App from './app/app';
+import { FunctionComponent, ReactElement } from "react";
+import { Outlet, RouteProps } from "react-router";
+import { LoginContent } from "../pages/login";
+import { useAuthContext } from "@asgardeo/auth-react";
 
-const authConfig = {
-    signInRedirectURL: "http://localhost:4200", // Application Sign-In request handle URL
-    signOutRedirectURL: "http://localhost:4200", // Application Sign-out request handle URL
-    clientID: "", // Application register ID
-    baseUrl: "", // Identity Provider Account Base Path
-    scope: [ "openid", "profile" ]
+/**
+ * Protected route component.
+ *
+ * @param {RouteProps} props - Props injected to the component.
+ * @return {React.ReactElement}
+ */
+ export const ProtectedRoute: FunctionComponent<RouteProps | any> = (props: any): ReactElement => {;
+
+    const { state } = useAuthContext();
+
+    return ( state?.username ? <Outlet { ...props } /> : <LoginContent authenticationMethod={ props.authenticationMethod } /> );
 };
-
-const root = ReactDOM.createRoot(
-    document.getElementById('root') as HTMLElement
-);
-
-root.render(
-    <StrictMode>
-        <CustomProvider theme="dark">
-            <AuthProvider config={ authConfig }>
-                <App />
-            </AuthProvider>
-        </CustomProvider>
-    </StrictMode>
-);

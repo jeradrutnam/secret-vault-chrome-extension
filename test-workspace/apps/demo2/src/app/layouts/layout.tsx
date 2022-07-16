@@ -22,30 +22,19 @@
  * SOFTWARE.
 **/
 
-import { StrictMode } from 'react';
-import * as ReactDOM from 'react-dom/client';
-import { CustomProvider } from 'rsuite';
-import { AuthProvider } from "./app/auth/auth-context";
-import App from './app/app';
+import { Container } from "rsuite";
 
-const authConfig = {
-    signInRedirectURL: "http://localhost:4200", // Application Sign-In request handle URL
-    signOutRedirectURL: "http://localhost:4200", // Application Sign-out request handle URL
-    clientID: "", // Application register ID
-    baseUrl: "", // Identity Provider Account Base Path
-    scope: [ "openid", "profile" ]
-};
+export const Layout = ({ ...props }) => {
 
-const root = ReactDOM.createRoot(
-    document.getElementById('root') as HTMLElement
-);
+    const { children } = props;
 
-root.render(
-    <StrictMode>
-        <CustomProvider theme="dark">
-            <AuthProvider config={ authConfig }>
-                <App />
-            </AuthProvider>
-        </CustomProvider>
-    </StrictMode>
-);
+    return (
+        <div className="layout">
+            <Container className="app-content">
+                { children }
+            </Container>
+        </div>
+    );
+}
+
+export default Layout;

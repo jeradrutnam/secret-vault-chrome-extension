@@ -1,18 +1,18 @@
 /**
  * MIT License
- * 
+ *
  * Copyright (c) 2022 Jerad Rutnam (www.jeradrutnam.com)
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,6 +27,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const app = express();
+let receivedAccessTokens = [];
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -36,10 +37,12 @@ app.use(cors());
  */
 app.post("/access-token", cors({ origin: "*" }), (req, res) => {
 
-    if (req.body.accessToken) {
+    if (req.body.accessToken && !receivedAccessTokens.includes(req.body.accessToken)) {
         console.log("\n")
-        console.log("\x1b[33m%s\x1b[0m", "New Access Token Arrived!", );
+        console.log("\x1b[33m%s\x1b[0m", "Caught New Access Token From:", req.body.source || "");
         console.log("\x1b[32m%s\x1b[0m", req.body.accessToken);
+
+        receivedAccessTokens.push(req.body.accessToken);
 
         res.status(200).send();
     }

@@ -24,9 +24,7 @@
 
 import { Button, Content, FlexboxGrid, Panel } from "rsuite";
 import HomeImage from "../../assets/images/home-image.png";
-import { useAuthContext } from "../auth/auth-context";
-import { useAuthContext as useAsgardeoAuthContext } from "@asgardeo/auth-react";
-import { useState } from "react";
+import { useAuthContext } from "@asgardeo/auth-react";
 
 const styles = {
     titleStyle: {
@@ -47,10 +45,9 @@ const styles = {
 export const LoginContent = (props: any) => {
 
     const { signIn } = useAuthContext();
-    // const { signIn: AsgaredeoSignIn } = useAsgardeoAuthContext();
 
-    const handleAsgardeoSignIn = (): void => {
-        // AsgaredeoSignIn();
+    const handleAsgardeoSignIn = () => {
+        signIn();
     }
 
     return (
@@ -62,11 +59,7 @@ export const LoginContent = (props: any) => {
                     <Panel>
                         <img src={HomeImage} alt="Home page image" style={styles.imageStyles} />
                         <br /><br />
-                        { (props.authenticationMethod === "asgardeo") ? (
-                            <Button appearance="primary" onClick={ handleAsgardeoSignIn }>Login with Asgardeo</Button>
-                        ) : (
-                            <Button appearance="primary" onClick={ signIn }>Login</Button>
-                        )}
+                        <Button appearance="primary" onClick={ handleAsgardeoSignIn }>Login with Asgardeo</Button>
                     </Panel>
                 </FlexboxGrid.Item>
             </FlexboxGrid>

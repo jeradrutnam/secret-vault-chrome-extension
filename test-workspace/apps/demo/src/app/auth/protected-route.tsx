@@ -33,9 +33,9 @@ import { useAuthContext } from "./auth-context";
  * @param {RouteProps} props - Props injected to the component.
  * @return {React.ReactElement}
  */
- export const ProtectedRoute: FunctionComponent<RouteProps> = (props: any): ReactElement => {;
+ export const ProtectedRoute: FunctionComponent<RouteProps | any> = (props: any): ReactElement => {;
 
     const { state } = useAuthContext();
 
-    return ( state?.username ? <Outlet { ...props } /> : <LoginContent /> );
+    return ( state?.username ? <Outlet { ...props } /> : <LoginContent authenticationMethod={ props.authenticationMethod } /> );
 };

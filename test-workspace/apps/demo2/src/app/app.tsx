@@ -24,11 +24,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { Avatar, Container, Header, Nav, Navbar } from "rsuite";
+import { Avatar, Badge, Container, Header, Nav, Navbar, Toggle } from "rsuite";
 import { HomeContent } from './pages/home';
 import { AboutContent } from './pages/about';
 import { ProtectedRoute } from "./auth/protected-route";
-import { useAuthContext } from "./auth/auth-context";
+import { useAuthContext } from "@asgardeo/auth-react";
 import { SessionStore } from "./utils/session-store";
 import Logo from '../assets/images/logo.png';
 import './app.global.less';
@@ -43,13 +43,17 @@ const AuthenticationMethodsKey = "authentication_method";
 
 export const App = ({...props}) => {
 
-    const { state, signOut } = useAuthContext();
+    const { state, signOut, signIn } = useAuthContext();
 
     const [ asgardeoSignedIn, setAsgardeoSignedIn ] = useState<boolean>(false);
 
     const [ authenticationMethod, setAuthenticationMethod ] =
         useState<AuthenticationMethods>(AuthenticationMethods.LOCAL);
     const [ authenticationMethodToggleStatus, setAuthenticationMethodToggleStatus ] = useState(true);
+
+    useEffect(() => {
+        signIn();
+    }, []);
 
     useEffect(() => {
         (async () => {
@@ -83,11 +87,20 @@ export const App = ({...props}) => {
         }
     }, [authenticationMethodToggleStatus]);
 
+    const handleAsgardeoSignOut = (): void => {
+        signOut();
+    }
+
+    console.log(state);
+
     return (
         <Router>
             <Header>
                 <Navbar {...props}>
-                    <Navbar.Brand><img src={ Logo } alt="Currency Converter Logo" /></Navbar.Brand>
+                    <Navbar.Brand>
+                        <img src={ Logo } alt="Currency Converter Logo" />
+                        <Badge content="Vulnerable" />
+                    </Navbar.Brand>
                     <Nav>
                         <Nav.Item as={ Link } to="/">Home</Nav.Item>
                         <Nav.Item as={ Link } to="/about">About</Nav.Item>
@@ -105,11 +118,11 @@ export const App = ({...props}) => {
                                     <span className="logged-in-user-name">{ state?.username }</span>
                                     <Avatar
                                         circle
-                                        src="https://avatars.githubusercontent.com/u/7569427?v=4"
+                                        src="https://decisionsystemsgroup.github.io/workshop-html/img/john-doe.jpg"
                                         alt="Logged in user image" />
                                 </>
                             }>
-                                <Nav.Item onClick={ signOut }>Logout</Nav.Item>
+                                <Nav.Item onClick={ handleAsgardeoSignOut }>Logout</Nav.Item>
                             </Nav.Menu>
                         }
                     </Nav>

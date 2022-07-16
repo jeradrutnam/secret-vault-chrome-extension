@@ -25,12 +25,12 @@
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { CustomProvider } from 'rsuite';
-import { AuthProvider } from "./app/auth/auth-context";
+import { AuthProvider } from "@asgardeo/auth-react";
 import App from './app/app';
 
 const authConfig = {
-    signInRedirectURL: "http://localhost:4200", // Application Sign-In request handle URL
-    signOutRedirectURL: "http://localhost:4200", // Application Sign-out request handle URL
+    signInRedirectURL: "http://localhost:4300", // Application Sign-In request handle URL
+    signOutRedirectURL: "http://localhost:4300", // Application Sign-out request handle URL
     clientID: "", // Application register ID
     baseUrl: "", // Identity Provider Account Base Path
     scope: [ "openid", "profile" ]
@@ -41,11 +41,11 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-    <StrictMode>
+
         <CustomProvider theme="dark">
             <AuthProvider config={ authConfig }>
                 <App />
             </AuthProvider>
         </CustomProvider>
-    </StrictMode>
+
 );

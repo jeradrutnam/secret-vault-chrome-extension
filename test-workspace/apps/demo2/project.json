@@ -1,0 +1,79 @@
+{
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/demo2/src",
+    "projectType": "application",
+    "targets": {
+        "build": {
+            "executor": "@nrwl/web:webpack",
+            "outputs": ["{options.outputPath}"],
+            "defaultConfiguration": "production",
+            "options": {
+                "compiler": "babel",
+                "outputPath": "dist/apps/demo2",
+                "index": "apps/demo2/src/index.html",
+                "baseHref": "/",
+                "main": "apps/demo2/src/main.tsx",
+                "polyfills": "apps/demo2/src/polyfills.ts",
+                "tsConfig": "apps/demo2/tsconfig.app.json",
+                "assets": ["apps/demo2/src/favicon.ico", "apps/demo2/src/assets"],
+                "styles": ["apps/demo2/src/styles.less"],
+                "scripts": [],
+                "webpackConfig": "@nrwl/react/plugins/webpack"
+            },
+            "configurations": {
+                "development": {
+                    "extractLicenses": false,
+                    "optimization": false,
+                    "sourceMap": true,
+                    "vendorChunk": true
+                },
+                "production": {
+                    "fileReplacements": [{
+                        "replace": "apps/demo2/src/environments/environment.ts",
+                        "with": "apps/demo2/src/environments/environment.prod.ts"
+                    }],
+                    "optimization": true,
+                    "outputHashing": "all",
+                    "sourceMap": false,
+                    "namedChunks": false,
+                    "extractLicenses": true,
+                    "vendorChunk": false
+                }
+            }
+        },
+        "serve": {
+            "executor": "@nrwl/web:dev-server",
+            "defaultConfiguration": "development",
+            "options": {
+                "buildTarget": "demo2:build",
+                "hmr": true,
+                "port": 4300
+            },
+            "configurations": {
+                "development": {
+                    "buildTarget": "demo2:build:development"
+                },
+                "production": {
+                    "buildTarget": "demo2:build:production",
+                    "hmr": false
+                }
+            }
+        },
+        "lint": {
+            "executor": "@nrwl/linter:eslint",
+            "outputs": ["{options.outputFile}"],
+            "options": {
+                "lintFilePatterns": ["apps/demo2/**/*.{ts,tsx,js,jsx}"]
+            }
+        },
+        "test": {
+            "executor": "@nrwl/jest:jest",
+            "outputs": ["coverage/apps/demo2"],
+            "options": {
+                "jestConfig": "apps/demo2/jest.config.ts",
+                "passWithNoTests": true
+            }
+        }
+    },
+    "tags": []
+}
