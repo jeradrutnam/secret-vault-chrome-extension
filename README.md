@@ -1,5 +1,12 @@
 # Secret Vault Chrome Extension
-A project to secure access token during OpenID Connect authentication flow for Single-Page Applications that runs completely on browsers.
+A project to secure access token during OpenID Connect authentication flow for Single-Page Applications that runs
+completely on browsers.
+
+This is only a Proof-of-Concept (PoC) develop to prove a research solution as a part of a MSc project. And not to use
+for production. As this is a PoC, project scope is narrowed down for the supporting of only OpenID connect
+Authorization code flow and using on Asgardeo.io configuration sample as the Identity Provider.
+
+So, in order to test the extension you will need to have an Asgardeo account and 2 Single-Page-Applications registered.
 
 ## Run Extension in Developer Mode
 
@@ -32,20 +39,11 @@ var checkReady = setInterval(() => {
 
         secureVaultInstance.checkSignIn();
 
-        login = function() {
-            secureVaultInstance.signIn();
-        };
-
-        logout = function() {
-            secureVaultInstance.signOut();
-        };
-
-        secureVaultInstance.on(secureVaultAPI.authHooks.SIGN_IN, (response) => {
-            console.log(response);
-        });
-
+        secureVaultInstance.on(secureVaultAPI.authHooks.SIGN_IN, (response) => { console.log(response); });
         secureVaultInstance.on(secureVaultAPI.authHooks.SIGN_OUT, (response) => {});
 
+        login = function() { secureVaultInstance.signIn(); };
+        logout = function() { secureVaultInstance.signOut(); };
         doAPIGet = function() {
             secureVaultInstance.httpGet("https://api.asgardeo.io/t/<org-name>/oauth2/userinfo?schema=openid")
                 .then((response) => {
@@ -62,14 +60,27 @@ var checkReady = setInterval(() => {
 
 ### Run Attacker Server
 
+This is a simple node + express server which acts as an attacker server to show received access tokens
+
 `cd test-workspace\apps\attacker-server` and run `npm start` in CLI
 
 ### Run Sample app that use the browser extension implementation
+
+This is a simple dummy react application that proof the extension will take care of securing the access token
+against XSS attacks that will be obtain through an OpenID connect authorization flow and stored in the browser.
+
+This sample proof an attack that simulates through a vulnerable dependency for HTML5 storages
+(localStorage/sessionStorage) and network calls
 
 1. `cd test-workspace` and run `npx nx run demo:serve:development` in CLI
 2. Navigate to app from the browser `http://localhost:4200/`
 
 ### Run Sample app (vulnerable) that uses session storage storing access token
+
+This is a simple dummy react application that simulate an XSS attack for HTML5 storages
+(localStorage/sessionStorage) and network calls through a vulnerable dependency.
+
+Obtained access token will be sent to the attacker-server
 
 1. `cd test-workspace` and run `npx nx run demo2:serve:development` in CLI
 2. Navigate to app from the browser `http://localhost:4300/`
