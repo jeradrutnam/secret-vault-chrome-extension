@@ -2,7 +2,7 @@
 A project to secure access token during OpenID Connect authentication flow for Single-Page Applications that runs
 completely on browsers.
 
-This is only a Proof-of-Concept (PoC) develop to prove a research solution as a part of a MSc project. And not to use
+This is only a Proof-of-Concept (PoC) develop to prove a research solution as a part of a study project, and not to use
 for production. As this is a PoC, project scope is narrowed down for the supporting of only OpenID connect
 Authorization code flow and using on Asgardeo.io configuration sample as the Identity Provider.
 
