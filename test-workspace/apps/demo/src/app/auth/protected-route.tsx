@@ -37,5 +37,5 @@ import { useAuthContext } from "./auth-context";
 
     const { state } = useAuthContext();
 
-    return ( state?.username ? <Outlet { ...props } /> : <LoginContent authenticationMethod={ props.authenticationMethod } /> );
+    return ( state?.username ? <Outlet { ...props } /> : <LoginContent /> );
 };

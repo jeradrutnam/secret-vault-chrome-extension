@@ -43,13 +43,27 @@ const AuthenticationMethodsKey = "authentication_method";
 
 export const App = ({...props}) => {
 
-    const { state, signOut, signIn } = useAuthContext();
+    const { state, signOut, signIn, httpRequest } = useAuthContext();
 
     const [ asgardeoSignedIn, setAsgardeoSignedIn ] = useState<boolean>(false);
-
+    const [ userDetails, setUserDetails ] = useState<any | null>(null);
     const [ authenticationMethod, setAuthenticationMethod ] =
         useState<AuthenticationMethods>(AuthenticationMethods.LOCAL);
     const [ authenticationMethodToggleStatus, setAuthenticationMethodToggleStatus ] = useState(true);
+
+    useEffect(() => {
+        if (state?.username) {
+            httpRequest({
+                method: "GET",
+                url: "https://api.asgardeo.io/t/jerad/oauth2/userinfo?schema=openid"
+            }).then((response) => {
+                setUserDetails(response.data);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+        }
+    }, [state]);
 
     useEffect(() => {
         signIn();
@@ -91,8 +105,6 @@ export const App = ({...props}) => {
         signOut();
     }
 
-    console.log(state);
-
     return (
         <Router>
             <Header>
@@ -116,10 +128,12 @@ export const App = ({...props}) => {
                             <Nav.Menu title={
                                 <>
                                     <span className="logged-in-user-name">{ state?.username }</span>
-                                    <Avatar
-                                        circle
-                                        src="https://decisionsystemsgroup.github.io/workshop-html/img/john-doe.jpg"
-                                        alt="Logged in user image" />
+                                    { userDetails?.picture &&
+                                        <Avatar
+                                            circle
+                                            src={ userDetails?.picture }
+                                            alt="Logged in user image" />
+                                    }
                                 </>
                             }>
                                 <Nav.Item onClick={ handleAsgardeoSignOut }>Logout</Nav.Item>

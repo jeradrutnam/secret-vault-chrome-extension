@@ -22,7 +22,6 @@
  * SOFTWARE.
 **/
 
-import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { CustomProvider } from 'rsuite';
 import { AuthProvider } from "@asgardeo/auth-react";
@@ -41,11 +40,9 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-
-        <CustomProvider theme="dark">
-            <AuthProvider config={ authConfig }>
-                <App />
-            </AuthProvider>
-        </CustomProvider>
-
+    <CustomProvider theme="dark">
+        <AuthProvider config={ authConfig }>
+            <App />
+        </AuthProvider>
+    </CustomProvider>
 );

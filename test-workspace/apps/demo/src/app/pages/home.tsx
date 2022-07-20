@@ -111,8 +111,11 @@ export const HomeContent = () => {
             </FlexboxGrid>
             <FlexboxGrid justify="center" align="middle">
                 <FlexboxGrid.Item colspan={12}>
-                    <Message showIcon type="info" header="Information" style={styleInfoBox}>
-                        Simulates an attack through a vulnerable dependency library.
+                    <Message showIcon type="success" header="Access Token is protected" style={styleInfoBox}>
+                        This sample simulates an attack through a vulnerable dependency library and proves that the
+                        access token cannot be steal by accessing HTML5 storage or by intercepting the network requests,
+                        when the secure vault extension is used, even the attacking script has access to the
+                        main thread of the application.
                     </Message>
                 </FlexboxGrid.Item>
             </FlexboxGrid>

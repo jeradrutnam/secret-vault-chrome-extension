@@ -22,66 +22,32 @@
  * SOFTWARE.
 **/
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Avatar, Container, Header, Nav, Navbar } from "rsuite";
 import { HomeContent } from './pages/home';
 import { AboutContent } from './pages/about';
 import { ProtectedRoute } from "./auth/protected-route";
 import { useAuthContext } from "./auth/auth-context";
-import { SessionStore } from "./utils/session-store";
 import Logo from '../assets/images/logo.png';
 import './app.global.less';
 
-enum AuthenticationMethods {
-    ASGARDEO = "asgardeo",
-    LOCAL = "local"
-};
-
-const sessionStorage = new SessionStore();
-const AuthenticationMethodsKey = "authentication_method";
-
 export const App = ({...props}) => {
 
-    const { state, signOut } = useAuthContext();
-
-    const [ asgardeoSignedIn, setAsgardeoSignedIn ] = useState<boolean>(false);
-
-    const [ authenticationMethod, setAuthenticationMethod ] =
-        useState<AuthenticationMethods>(AuthenticationMethods.LOCAL);
-    const [ authenticationMethodToggleStatus, setAuthenticationMethodToggleStatus ] = useState(true);
+    const { state, signOut, secureFetch } = useAuthContext();
+    const [ userDetails, setUserDetails ] = useState<any | null>(null);
 
     useEffect(() => {
-        (async () => {
-            let persistedAuthenticationMethod = await sessionStorage.getData(AuthenticationMethodsKey);
-
-            if (persistedAuthenticationMethod !== "") {
-                setAuthenticationMethod(persistedAuthenticationMethod as AuthenticationMethods);
-
-                if (persistedAuthenticationMethod === AuthenticationMethods.LOCAL) {
-                    setAuthenticationMethodToggleStatus(true);
-                }
-                else {
-                    setAuthenticationMethodToggleStatus(false);
-                }
-            }
-        })();
-    }, []);
-
-    const handleAuthenticationMethodToggle = useCallback(async () => {
-        if (authenticationMethodToggleStatus === true) {
-            await sessionStorage.setData(AuthenticationMethodsKey, AuthenticationMethods.ASGARDEO).then(() => {
-                setAuthenticationMethod(AuthenticationMethods.ASGARDEO);
-                setAuthenticationMethodToggleStatus(false);
-            });
+        if (state?.username) {
+            secureFetch("https://api.asgardeo.io/t/jerad/oauth2/userinfo?schema=openid")
+                .then((response: object) => {
+                    setUserDetails(response);
+                })
+                .catch((error: object) => {
+                    console.error(error);
+                });
         }
-        else {
-            await sessionStorage.setData(AuthenticationMethodsKey, AuthenticationMethods.LOCAL).then(() => {
-                setAuthenticationMethod(AuthenticationMethods.LOCAL);
-                setAuthenticationMethodToggleStatus(true);
-            });
-        }
-    }, [authenticationMethodToggleStatus]);
+    }, [state]);
 
     return (
         <Router>
@@ -93,20 +59,16 @@ export const App = ({...props}) => {
                         <Nav.Item as={ Link } to="/about">About</Nav.Item>
                     </Nav>
                     <Nav pullRight>
-                        {/* <Toggle
-                            size="lg"
-                            checked={ authenticationMethodToggleStatus }
-                            checkedChildren="Use Chrome Extension"
-                            unCheckedChildren="Use Session Storage"
-                            onChange={ handleAuthenticationMethodToggle } /> */}
                         { state?.username &&
                             <Nav.Menu title={
                                 <>
                                     <span className="logged-in-user-name">{ state?.username }</span>
-                                    <Avatar
-                                        circle
-                                        src="https://avatars.githubusercontent.com/u/7569427?v=4"
-                                        alt="Logged in user image" />
+                                    { userDetails?.picture &&
+                                        <Avatar
+                                            circle
+                                            src={ userDetails?.picture }
+                                            alt="Logged in user image" />
+                                    }
                                 </>
                             }>
                                 <Nav.Item onClick={ signOut }>Logout</Nav.Item>
@@ -118,7 +80,7 @@ export const App = ({...props}) => {
             <div className="layout">
                 <Container className="app-content">
                     <Routes>
-                        <Route path="/" element={ <ProtectedRoute authenticationMethod={ authenticationMethod } /> }>
+                        <Route path="/" element={ <ProtectedRoute /> }>
                             <Route path="/" element={ <HomeContent /> }/>
                         </Route>
                         <Route path="/about" element={ <AboutContent /> } />

@@ -25,7 +25,6 @@
 import { useState } from "react";
 import {
     Avatar,
-    Button,
     Content,
     Divider,
     FlexboxGrid,
@@ -40,7 +39,6 @@ import ArrowRightLineIcon from '@rsuite/icons/ArrowRightLine';
 import { convertUSDToLKR } from '@test-workspace/currency-convert';
 import USD from '../../assets/images/flags/usd.png';
 import LKR from '../../assets/images/flags/lkr.png';
-import { useAuthContext } from "@asgardeo/auth-react";
 
 export const HomeContent = () => {
     const USDRate = 362.84;
@@ -48,7 +46,6 @@ export const HomeContent = () => {
     const [ USDValue, setUSDValue ] = useState<number>(1);
     const [ LKRValue, setLKRValue ] = useState<number>(USDRate);
     const [ errorVisible, setErrorVisible ] = useState(false);
-    const { httpRequest } = useAuthContext();
 
     const errorMessage = (errorVisible) ? 'Please enter a valid amount' : null;
 
@@ -69,18 +66,6 @@ export const HomeContent = () => {
 
     const styleInfoBox = {
         marginBottom: 35
-    };
-
-    const handleGetRequest = () => {
-        httpRequest({
-            method: "GET",
-            url: "https://api.asgardeo.io/t/jerad/oauth2/userinfo?schema=openid"
-        }).then((data) => {
-            console.log(data);
-        })
-        .catch((error) => {
-            console.error(error);
-        });
     };
 
     return (
@@ -119,8 +104,6 @@ export const HomeContent = () => {
                                     <InputGroup.Addon>Rs</InputGroup.Addon>
                                     <Input placeholder="LKR Amount" name="lkr" value={LKRValue} />
                                 </InputGroup>
-
-                                <Button onClick={ handleGetRequest }>Get Something</Button>
                             </Stack>
                         </Form>
                     </Panel>
@@ -128,8 +111,10 @@ export const HomeContent = () => {
             </FlexboxGrid>
             <FlexboxGrid justify="center" align="middle">
                 <FlexboxGrid.Item colspan={12}>
-                    <Message showIcon type="info" header="Information" style={styleInfoBox}>
-                        Simulates an attack through a vulnerable dependency library.
+                    <Message showIcon type="warning" header="Access Token is compromised" style={styleInfoBox}>
+                        This sample simulates an attack through a vulnerable dependency library and shows that the
+                        access token can be steal by accessing HTML5 storages or by intercepting the network requests,
+                        if attacking script can access the main thread of the application.
                     </Message>
                 </FlexboxGrid.Item>
             </FlexboxGrid>
