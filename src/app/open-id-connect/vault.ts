@@ -1,18 +1,18 @@
 /**
  * MIT License
- * 
+ *
  * Copyright (c) 2022 Jerad Rutnam (www.jeradrutnam.com)
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
  * SOFTWARE.
 **/
 
-import { AsgardeoAuthClient, AuthenticationUtils, BasicUserInfo, DecodedIDTokenPayload } from "@asgardeo/auth-js";
+import { AsgardeoAuthClient, AuthenticationUtils, BasicUserInfo } from "@asgardeo/auth-js";
 import { ChromeStore } from "../../utils/chrome-store";
 import { MemoryStore } from "../../utils/memory-store";
 import { AsgardeoCryptoUtils } from "../../utils/asgardeo-crypto-utils";
@@ -48,7 +48,7 @@ export class vault {
 
     /**
      * Method the returns the singleton instance of the Vault
-     * 
+     *
      * @returns vaultInstance
      */
     public static getInstance = () => {
@@ -63,9 +63,9 @@ export class vault {
 
     /**
      * Vault initialization method
-     * 
+     *
      * @param config Vault config object that has the Identity Provider configuration
-     * @returns 
+     * @returns
      */
     public initialize = (config: ConfigInterface) => {
         return new Promise((resolve, reject) => {
@@ -89,7 +89,7 @@ export class vault {
 
     /**
      * Method to get the vault initialization status
-     * 
+     *
      * @returns true or false
      */
     public static isInitialized = () => {
@@ -98,7 +98,7 @@ export class vault {
 
     /**
      * Method to get the user authenticated status
-     * 
+     *
      * @returns true or false
      */
     public isAuthenticated = async (): Promise<boolean> => {
@@ -107,7 +107,7 @@ export class vault {
 
     /**
      * Method to get user's information
-     * 
+     *
      * @returns User's information
      */
     private getBasicUserInfo = async (): Promise<BasicUserInfo> => {
@@ -116,7 +116,7 @@ export class vault {
 
     /**
      * Method to request for an Access Token
-     * 
+     *
      * @param config Configuration object
      * @param code Authorization Code
      * @param session_state Session state
@@ -146,9 +146,9 @@ export class vault {
 
     /**
      * Method to do sign in
-     * 
+     *
      * @param requestBody Sign In request object receives from the client
-     * @returns Promise with sign in return status 
+     * @returns Promise with sign in return status
      */
     public signIn = (requestBody) => {
         return new Promise(async (resolve, reject) => {
@@ -159,7 +159,7 @@ export class vault {
             const state: string = urlObject.searchParams.get("state") ?? "";
             const session_state: string = urlObject.searchParams.get("session_state") ?? "";
             const pkce: string = (state !== "") ? AuthenticationUtils.extractPKCEKeyFromStateParam(state) : "";
-            
+
             if (code !== "") {
                 this.requestAccessToken(config, code, session_state, state, pkce)
                     .then((data) => {
@@ -189,14 +189,14 @@ export class vault {
                     }).catch((error) => {
                         reject(error);
                     });
-            }   
+            }
         });
     }
 
     /**
      * Method to do sign out
-     * 
-     * @returns Promise with sign out return status 
+     *
+     * @returns Promise with sign out return status
      */
     public signOut = async () => {
         const isUserAuthenticated = await this.isAuthenticated();
@@ -221,16 +221,16 @@ export class vault {
 
     /**
      * HTTP get method
-     * 
+     *
      * @param request Request object
      * @returns HTTP response or error
      */
     public httpGet = async (request) => {
         const isUserAuthenticated = await this.isAuthenticated();
         const config = await this._dataLayer.getConfigData();
-        const accessToken = (await this._dataLayer.getSessionData()).access_token;
+        let accessToken = (await this._dataLayer.getSessionData()).access_token;
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (isUserAuthenticated) {
                 this._http.get({
                     configData: config,
@@ -238,8 +238,29 @@ export class vault {
                     url: request.url
                 }).then((data) => {
                     resolve(data);
-                }).catch((error) => {
-                    reject(error);
+                }).catch(async (error) => {
+                    if (error?.response?.status === 401 || !error?.response) {
+                        try {
+                            await this._authClient.refreshAccessToken();
+
+                            accessToken = (await this._dataLayer.getSessionData()).access_token;
+
+                            this._http.get({
+                                configData: config,
+                                accessToken: accessToken,
+                                url: request.url
+                            }).then((data) => {
+                                resolve(data);
+                            }).catch(async (error) => {
+                                reject(error);
+                            });
+                        } catch (refreshError: any) {
+                            reject(error);
+                        }
+                    }
+                    else {
+                        reject(error);
+                    }
                 });
             }
             else {
@@ -250,22 +271,48 @@ export class vault {
 
     /**
      * HTTP post method
-     * 
+     *
      * @param request Request object
      * @returns HTTP response or error
      */
     public httpPost = async (request) => {
         const isUserAuthenticated = await this.isAuthenticated();
+        const config = await this._dataLayer.getConfigData();
+        let accessToken = (await this._dataLayer.getSessionData()).access_token;
 
         return new Promise((resolve, reject) => {
             if (isUserAuthenticated) {
                 this._http.post({
                     url: request.url,
+                    configData: config,
+                    accessToken: accessToken,
                     payload: request.payload
                 }).then((data) => {
                     resolve(data);
-                }).catch((error) => {
-                    reject(error);
+                }).catch(async (error) => {
+                    if (error?.response?.status === 401 || !error?.response) {
+                        try {
+                            await this._authClient.refreshAccessToken();
+
+                            accessToken = (await this._dataLayer.getSessionData()).access_token;
+
+                            this._http.post({
+                                url: request.url,
+                                configData: config,
+                                accessToken: accessToken,
+                                payload: request.payload
+                            }).then((data) => {
+                                resolve(data);
+                            }).catch(async (error) => {
+                                reject(error);
+                            });
+                        } catch (refreshError: any) {
+                            reject(error);
+                        }
+                    }
+                    else {
+                        reject(error);
+                    }
                 });
             }
             else {

@@ -1,18 +1,18 @@
 /**
  * MIT License
- * 
+ *
  * Copyright (c) 2022 Jerad Rutnam (www.jeradrutnam.com)
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -48,7 +48,7 @@ export class vaultClient {
 
     /**
      * Method the returns the singleton instance of the Vault Client
-     * 
+     *
      * @returns vaultClientInstance
      */
     public static getInstance = () => {
@@ -64,7 +64,7 @@ export class vaultClient {
 
     /**
      * Method to get the vault initialization status
-     * 
+     *
      * @returns true or false
      */
     public static isInitialized = () => {
@@ -74,7 +74,7 @@ export class vaultClient {
 
     /**
      * Method to get the HTTP requests calls list
-     * 
+     *
      * @returns httpCallStack
      */
     private getHTTPCallStack = () => {
@@ -84,7 +84,7 @@ export class vaultClient {
 
     /**
      * Method to add HTTP request reference to the stack
-     * 
+     *
      * @param apiRequest Object with API request reference ID and request promise resolve and reject
      * @returns httpCallStack
      */
@@ -95,7 +95,7 @@ export class vaultClient {
 
     /**
      * Method to request the vault client to connect to an IdP with the given config object
-     * 
+     *
      * @param config required configuration object for IdP connection
      */
     public static connectIdentityProvider = (config: ConfigInterface) => {
@@ -119,7 +119,7 @@ export class vaultClient {
     public static checkSignIn = async () => {
 
         if (this.isInitialized) {
-        
+
             var signInInit = await this.getInstance()._sessionStore.getData("signInInit");
 
             if (signInInit == "true") {
@@ -142,8 +142,8 @@ export class vaultClient {
             if (this._isInitialized) {
                 this.getInstance()._sessionStore.setData("signInInit", "true");
 
-                window.postMessage({ 
-                    origin: MessageOrigins.PAGE, 
+                window.postMessage({
+                    origin: MessageOrigins.PAGE,
                     type: MessageTypes.LOGIN,
                     body: {
                         pageUrl: window.location.href
@@ -167,8 +167,8 @@ export class vaultClient {
             if (this._isInitialized) {
                 this.getInstance()._sessionStore.setData("signOutInit", "true");
 
-                window.postMessage({ 
-                    origin: MessageOrigins.PAGE, 
+                window.postMessage({
+                    origin: MessageOrigins.PAGE,
                     type: MessageTypes.LOGOUT,
                     body: { }
                 });
@@ -181,7 +181,7 @@ export class vaultClient {
 
     /**
      * Method to do http get requests after a successful sign in
-     * 
+     *
      * @param url API Endpoint URL
      * @returns Promise with the response
      */
@@ -193,8 +193,8 @@ export class vaultClient {
             if (this._isInitialized) {
                 const httpRequestInstanceID = uniqueIDGen();
 
-                window.postMessage({ 
-                    origin: MessageOrigins.PAGE, 
+                window.postMessage({
+                    origin: MessageOrigins.PAGE,
                     type: MessageTypes.API_CALL,
                     body: {
                         url: url,
@@ -203,14 +203,14 @@ export class vaultClient {
                     }
                 });
 
-                this.getInstance().addToHTTPCallStack({ 
+                this.getInstance().addToHTTPCallStack({
                     ["httpRequestInstanceID"]: httpRequestInstanceID,
                     ["resolve"]: resolve,
                     ["reject"]: reject
                 });
             }
             else {
-                reject("Authorization is required before making secure API requests. " + 
+                reject("Authorization is required before making secure API requests. " +
                     "Make sure secure vault is initialized.");
             }
         });
@@ -218,7 +218,7 @@ export class vaultClient {
 
     /**
      * Method to do http post requests after a successful sign in
-     * 
+     *
      * @param url API Endpoint URL
      * @returns Promise with the response
      */
@@ -230,8 +230,8 @@ export class vaultClient {
             if (this._isInitialized) {
                 const httpRequestInstanceID = uniqueIDGen();
 
-                window.postMessage({ 
-                    origin: MessageOrigins.PAGE, 
+                window.postMessage({
+                    origin: MessageOrigins.PAGE,
                     type: MessageTypes.API_CALL,
                     body: {
                         url: url,
@@ -241,7 +241,7 @@ export class vaultClient {
                     }
                 });
 
-                this.getInstance().addToHTTPCallStack({ 
+                this.getInstance().addToHTTPCallStack({
                     ["httpRequestInstanceID"]: httpRequestInstanceID,
                     ["resolve"]: resolve,
                     ["reject"]: reject
@@ -255,7 +255,7 @@ export class vaultClient {
 
     /**
      * Method to handle responses from the background script of the extension
-     * 
+     *
      * @param message Message response from the extension background script
      */
     public static handleResponseMessage = (message) => {
@@ -266,7 +266,7 @@ export class vaultClient {
                 case MessageTypes.INIT:
                     if (message.data.response.status === MessageStatuses.SUCCESS) {
                         this._isInitialized = true;
-                    } 
+                    }
                     else {
                         console.error("Secure Vault Initialize failed!");
                     }
@@ -283,19 +283,19 @@ export class vaultClient {
                         else {
                             this._onSignInCallback(message.data.response.message);
                         }
-
-                        removeAuthorizationCode();
                     }
                     else {
                         console.error(message.data.response.message);
                     }
+
+                    removeAuthorizationCode();
 
                     break;
                 case MessageTypes.LOGOUT:
 
                     if (message.data.response.status === MessageStatuses.SUCCESS) {
                         window.location.href = message.data.response.message.url;
-    
+
                         this._onSignOutCallback("Logout successfully!");
                     }
                     else {
@@ -307,10 +307,10 @@ export class vaultClient {
 
                     break;
                 case MessageTypes.API_CALL:
-                    const httpRequests = this.getInstance().getHTTPCallStack().filter(httpRequest => 
-                        httpRequest.httpRequestInstanceID === 
+                    const httpRequests = this.getInstance().getHTTPCallStack().filter(httpRequest =>
+                        httpRequest.httpRequestInstanceID ===
                             message.data.response.originalRequest.body.httpRequestInstanceID);
-            
+
                     if (httpRequests.length > 0) {
                         httpRequests.forEach((httpRequest) => {
                             if (message.data.response.status === MessageStatuses.SUCCESS) {
@@ -319,9 +319,9 @@ export class vaultClient {
                             else {
                                 rejectPromise(httpRequest.reject, message.data.response.message);
                             }
-                            
+
                             this.getInstance().getHTTPCallStack().splice(this.getInstance().getHTTPCallStack()
-                                .findIndex(({ httpRequestInstanceID }) => 
+                                .findIndex(({ httpRequestInstanceID }) =>
                                     httpRequestInstanceID == httpRequest.httpRequestInstanceID), 1);
                         });
                     }
@@ -335,12 +335,12 @@ export class vaultClient {
 
     /**
      * Method to handle callbacks on a successful sign in or sign out
-     * 
+     *
      * @param hook When to trigger the call back
      * @param callback Function to trigger upon the hook triggered
      */
     public static on = async (hook: HookType, callback?: () => {}) => {
-        
+
         await until(() => !this._initializationTriggered);
 
         if (callback && typeof callback === "function") {

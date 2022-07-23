@@ -52,21 +52,32 @@ export const App = ({...props}) => {
     const [ authenticationMethodToggleStatus, setAuthenticationMethodToggleStatus ] = useState(true);
 
     useEffect(() => {
-        if (state?.username) {
-            httpRequest({
-                method: "GET",
-                url: "https://api.asgardeo.io/t/jerad/oauth2/userinfo?schema=openid"
-            }).then((response) => {
-                setUserDetails(response.data);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-        }
+        (async () => {
+            if (state?.username) {
+
+                await sessionStorage.setData("sign-in-init", "true");
+
+                httpRequest({
+                    method: "GET",
+                    url: "https://api.asgardeo.io/t/jerad/oauth2/userinfo?schema=openid"
+                }).then((response) => {
+                    setUserDetails(response.data);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+            }
+        })();
     }, [state]);
 
     useEffect(() => {
-        signIn();
+        (async () => {
+            const isSingInInit = await sessionStorage.getData("sign-in-init");
+
+            if (isSingInInit === "true") {
+                signIn();
+            }
+        })();
     }, []);
 
     useEffect(() => {
@@ -102,6 +113,7 @@ export const App = ({...props}) => {
     }, [authenticationMethodToggleStatus]);
 
     const handleAsgardeoSignOut = (): void => {
+        sessionStorage.removeData("sign-in-init");
         signOut();
     }
 
