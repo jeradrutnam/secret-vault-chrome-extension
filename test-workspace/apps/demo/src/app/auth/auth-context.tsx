@@ -25,22 +25,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { until } from "../utils/async-utils";
 
-interface AuthSate {
-    username: string;
-}
-
-interface AuthContextInterface {
-    checkSignIn: () => void;
-    secureFetch: (endpoint: string) => Promise<any>;
-    signIn: () => Promise<any>;
-    signOut: () => Promise<any>;
-    state: AuthSate | null;
-}
-
-const defaultState = {
-    username: ""
-}
-
 /**
  * Authentication Context to hold global states in react components.
  */
