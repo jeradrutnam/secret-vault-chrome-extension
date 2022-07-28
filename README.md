@@ -30,8 +30,8 @@ var checkReady = setInterval(() => {
         secureVaultInstance = secureVaultAPI.getInstance();
 
         secureVaultInstance.connectIdentityProvider({
-            signInRedirectURL: "http://localhost:4200/app", // Application Sign-In request handle URL
-            signOutRedirectURL: "http://localhost:4200/app", // Application Sign-out request handle URL
+            signInRedirectURL: "http://localhost:[port]/app", // Application Sign-In request handle URL
+            signOutRedirectURL: "http://localhost:[port]/app", // Application Sign-out request handle URL
             clientID: "<client-id>", // Application register ID
             baseUrl: "https://api.asgardeo.io/t/<org-name>", // Identity Provider Account Base Path
             scope: ["openid", "profile"]
@@ -62,7 +62,7 @@ var checkReady = setInterval(() => {
 
 This is a simple node + express server which acts as an attacker server to show received access tokens
 
-`cd test-workspace\apps\attacker-server` and run `npm start` in CLI
+Run `npm run attacker-server` in CLI
 
 ### Run Sample app that use the browser extension implementation
 
@@ -72,7 +72,7 @@ against XSS attacks that will be obtain through an OpenID connect authorization 
 This sample proof an attack that simulates through a vulnerable dependency for HTML5 storages
 (localStorage/sessionStorage) and network calls
 
-1. `cd test-workspace` and run `npx nx run demo:serve:development` in CLI
+1. Run `npm run demo` in CLI
 2. Navigate to app from the browser `http://localhost:4200/`
 
 ### Run Sample app (vulnerable) that uses session storage storing access token
@@ -82,7 +82,7 @@ This is a simple dummy react application that simulate an XSS attack for HTML5 s
 
 Obtained access token will be sent to the attacker-server
 
-1. `cd test-workspace` and run `npx nx run demo2:serve:development` in CLI
+1. Run `npm run demo2` in CLI
 2. Navigate to app from the browser `http://localhost:4300/`
 
 ## License
