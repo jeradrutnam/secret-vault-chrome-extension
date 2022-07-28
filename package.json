@@ -5,6 +5,9 @@
     "main": "index.js",
     "scripts": {
         "start": "npx webpack --watch",
+        "demo": "cd test-workspace && npx nx run demo:serve:development",
+        "demo2": "cd test-workspace && npx nx run demo2:serve:development",
+        "attacker-server": "cd test-workspace && npx nx run attacker-server:serve:development",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
