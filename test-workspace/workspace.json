@@ -2,6 +2,7 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "attacker-server": "apps/attacker-server",
     "currency-convert": "libs/currency-convert",
     "demo": "apps/demo",
     "demo-e2e": "apps/demo-e2e",

