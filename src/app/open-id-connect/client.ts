@@ -22,14 +22,17 @@
  * SOFTWARE.
 **/
 
-import { MessageStatuses, MessageTypes, MessageOrigins, MessageType } from "../../models/message";
+import { MessageStatuses, MessageTypes, MessageOrigins } from "../../models/message";
 import { ConfigInterface } from "../../models/config";
 import { Hooks, HookType } from "../../models/hooks";
 import { uniqueIDGen } from "../../utils/string-utils";
-import { SessionStore } from "../../utils/session-store";
+import { LocalStore } from "../../utils/local-store";
 import { removeAuthorizationCode } from "../../utils/url-utils";
 import { resolvePromise, rejectPromise, until } from "../../utils/promise-utils";
 import { HTTPAuthorizationRequiredError, httpCallStackInterface, HTTPMethods } from "../../models/http";
+
+const SIGN_IN_INIT_STORAGE_KEY = "signInInit";
+const SIGN_OUT_INIT_STORAGE_KEY = "signOutInit";
 
 /**
  * Vault Client Class
@@ -37,7 +40,7 @@ import { HTTPAuthorizationRequiredError, httpCallStackInterface, HTTPMethods } f
 export class vaultClient {
     private static _instance: vaultClient;
     private _authConfig: ConfigInterface;
-    private _sessionStore = new SessionStore();
+    private _localStore = new LocalStore();
     private static _initializationTriggered = false;
     private static _isInitialized = false;
     private _httpCallStack = [];
@@ -120,7 +123,7 @@ export class vaultClient {
 
         if (this.isInitialized) {
 
-            var signInInit = await this.getInstance()._sessionStore.getData("signInInit");
+            const signInInit = await this.getInstance()._localStore.getData(SIGN_IN_INIT_STORAGE_KEY);
 
             if (signInInit == "true") {
                 this.signIn();
@@ -140,7 +143,7 @@ export class vaultClient {
 
         return new Promise((resolve, reject) => {
             if (this._isInitialized) {
-                this.getInstance()._sessionStore.setData("signInInit", "true");
+                this.getInstance()._localStore.setData(SIGN_IN_INIT_STORAGE_KEY, "true");
 
                 window.postMessage({
                     origin: MessageOrigins.PAGE,
@@ -165,7 +168,7 @@ export class vaultClient {
 
         return new Promise((resolve, reject) => {
             if (this._isInitialized) {
-                this.getInstance()._sessionStore.setData("signOutInit", "true");
+                this.getInstance()._localStore.setData(SIGN_OUT_INIT_STORAGE_KEY, "true");
 
                 window.postMessage({
                     origin: MessageOrigins.PAGE,
@@ -292,18 +295,17 @@ export class vaultClient {
 
                     break;
                 case MessageTypes.LOGOUT:
-
                     if (message.data.response.status === MessageStatuses.SUCCESS) {
+                        this.getInstance()._localStore.removeData(SIGN_IN_INIT_STORAGE_KEY);
+                        this.getInstance()._localStore.removeData(SIGN_OUT_INIT_STORAGE_KEY);
+
                         window.location.href = message.data.response.message.url;
 
                         this._onSignOutCallback("Logout successfully!");
                     }
                     else {
-                        console.error(message.data.response.message);
+                        location.reload();
                     }
-
-                    this.getInstance()._sessionStore.removeData("signInInit");
-                    this.getInstance()._sessionStore.removeData("signOutInit");
 
                     break;
                 case MessageTypes.API_CALL:

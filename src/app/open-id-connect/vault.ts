@@ -28,7 +28,7 @@ import { MemoryStore } from "../../utils/memory-store";
 import { AsgardeoCryptoUtils } from "../../utils/asgardeo-crypto-utils";
 import { httpClient } from "../../utils/http-client";
 import { ConfigInterface } from "../../models/config";
-import { HTTPAuthorizationRequiredError, HTTPNoAuthentionSessionError } from "../../models/http";
+import { HTTPNoAuthenticationSessionError } from "../../models/http";
 
 /**
  * Vault Class
@@ -214,7 +214,7 @@ export class vault {
                     });
             }
             else {
-                reject(HTTPNoAuthentionSessionError);
+                reject(HTTPNoAuthenticationSessionError);
             }
         });
     }
@@ -228,43 +228,51 @@ export class vault {
     public httpGet = async (request) => {
         const isUserAuthenticated = await this.isAuthenticated();
         const config = await this._dataLayer.getConfigData();
+        const urlObject: URL = new URL(request.url);
+        const allowedDomains = config.allowedDomains?.filter(allowedDomain => allowedDomain === urlObject.origin);
+
         let accessToken = (await this._dataLayer.getSessionData()).access_token;
 
         return new Promise(async (resolve, reject) => {
-            if (isUserAuthenticated) {
-                this._http.get({
-                    configData: config,
-                    accessToken: accessToken,
-                    url: request.url
-                }).then((data) => {
-                    resolve(data);
-                }).catch(async (error) => {
-                    if (error?.response?.status === 401 || !error?.response) {
-                        try {
-                            await this._authClient.refreshAccessToken();
-
-                            accessToken = (await this._dataLayer.getSessionData()).access_token;
-
-                            this._http.get({
-                                configData: config,
-                                accessToken: accessToken,
-                                url: request.url
-                            }).then((data) => {
-                                resolve(data);
-                            }).catch(async (error) => {
-                                reject(error);
-                            });
-                        } catch (refreshError: any) {
-                            reject(error);
-                        }
-                    }
-                    else {
-                        reject(error);
-                    }
-                });
+            if (!allowedDomains || allowedDomains?.length <= 0) {
+                reject("Request URL is not authorized.");
             }
             else {
-                reject(HTTPAuthorizationRequiredError);
+                if (isUserAuthenticated) {
+                    this._http.get({
+                        configData: config,
+                        accessToken: accessToken,
+                        url: request.url
+                    }).then((data) => {
+                        resolve(data);
+                    }).catch(async (error) => {
+                        if (error?.response?.status === 401 || !error?.response) {
+                            try {
+                                await this._authClient.refreshAccessToken();
+
+                                accessToken = (await this._dataLayer.getSessionData()).access_token;
+
+                                this._http.get({
+                                    configData: config,
+                                    accessToken: accessToken,
+                                    url: request.url
+                                }).then((data) => {
+                                    resolve(data);
+                                }).catch(async (error) => {
+                                    reject(error);
+                                });
+                            } catch (refreshError: any) {
+                                reject(error);
+                            }
+                        }
+                        else {
+                            reject(error);
+                        }
+                    });
+                }
+                else {
+                    reject(HTTPNoAuthenticationSessionError);
+                }
             }
         });
     }
@@ -278,45 +286,53 @@ export class vault {
     public httpPost = async (request) => {
         const isUserAuthenticated = await this.isAuthenticated();
         const config = await this._dataLayer.getConfigData();
+        const urlObject: URL = new URL(request.url);
+        const allowedDomains = config.allowedDomains?.filter(allowedDomain => allowedDomain === urlObject.origin);
+
         let accessToken = (await this._dataLayer.getSessionData()).access_token;
 
         return new Promise((resolve, reject) => {
-            if (isUserAuthenticated) {
-                this._http.post({
-                    url: request.url,
-                    configData: config,
-                    accessToken: accessToken,
-                    payload: request.payload
-                }).then((data) => {
-                    resolve(data);
-                }).catch(async (error) => {
-                    if (error?.response?.status === 401 || !error?.response) {
-                        try {
-                            await this._authClient.refreshAccessToken();
-
-                            accessToken = (await this._dataLayer.getSessionData()).access_token;
-
-                            this._http.post({
-                                url: request.url,
-                                configData: config,
-                                accessToken: accessToken,
-                                payload: request.payload
-                            }).then((data) => {
-                                resolve(data);
-                            }).catch(async (error) => {
-                                reject(error);
-                            });
-                        } catch (refreshError: any) {
-                            reject(error);
-                        }
-                    }
-                    else {
-                        reject(error);
-                    }
-                });
+            if (!allowedDomains || allowedDomains?.length <= 0) {
+                reject("Request URL is not authorized.");
             }
             else {
-                reject(HTTPAuthorizationRequiredError);
+                if (isUserAuthenticated) {
+                    this._http.post({
+                        url: request.url,
+                        configData: config,
+                        accessToken: accessToken,
+                        payload: request.payload
+                    }).then((data) => {
+                        resolve(data);
+                    }).catch(async (error) => {
+                        if (error?.response?.status === 401 || !error?.response) {
+                            try {
+                                await this._authClient.refreshAccessToken();
+
+                                accessToken = (await this._dataLayer.getSessionData()).access_token;
+
+                                this._http.post({
+                                    url: request.url,
+                                    configData: config,
+                                    accessToken: accessToken,
+                                    payload: request.payload
+                                }).then((data) => {
+                                    resolve(data);
+                                }).catch(async (error) => {
+                                    reject(error);
+                                });
+                            } catch (refreshError: any) {
+                                reject(error);
+                            }
+                        }
+                        else {
+                            reject(error);
+                        }
+                    });
+                }
+                else {
+                    reject(HTTPNoAuthenticationSessionError);
+                }
             }
         });
     }

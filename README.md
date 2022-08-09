@@ -34,6 +34,7 @@ var checkReady = setInterval(() => {
             signOutRedirectURL: "http://localhost:[port]/app", // Application Sign-out request handle URL
             clientID: "<client-id>", // Application register ID
             baseUrl: "https://api.asgardeo.io/t/<org-name>", // Identity Provider Account Base Path
+            allowedDomains: ["https://api.asgardeo.io"], // URL domains that will be call after authentication
             scope: ["openid", "profile"]
         });
 

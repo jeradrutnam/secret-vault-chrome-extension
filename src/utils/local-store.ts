@@ -22,7 +22,7 @@
  * SOFTWARE.
 **/
 
-export class SessionStore {
+export class LocalStore {
 
     public constructor() { }
 
@@ -36,7 +36,7 @@ export class SessionStore {
     public async setData(key: string, value: string): Promise<void> {
         return new Promise((resolve, reject) => {
             try {
-                sessionStorage.setItem(key, value);
+                localStorage.setItem(key, value);
                 resolve();
             } catch (error) {
                 reject(error);
@@ -53,7 +53,7 @@ export class SessionStore {
     public async getData(key: string): Promise<string> {
         return new Promise((resolve, reject) => {
             try {
-                resolve(sessionStorage.getItem(key) || "");
+                resolve(localStorage.getItem(key) || "");
             } catch (error) {
                 reject(error);
             }
@@ -69,7 +69,7 @@ export class SessionStore {
     public async removeData(key: string): Promise<void> {
         return new Promise((resolve, reject) => {
             try {
-                sessionStorage.removeItem(key);
+                localStorage.removeItem(key);
                 resolve();
             } catch (error) {
                 reject(error);

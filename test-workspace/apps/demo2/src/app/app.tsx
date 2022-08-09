@@ -29,7 +29,7 @@ import { HomeContent } from './pages/home';
 import { AboutContent } from './pages/about';
 import { ProtectedRoute } from "./auth/protected-route";
 import { useAuthContext } from "@asgardeo/auth-react";
-import { SessionStore } from "./utils/session-store";
+import { LocalStore } from "./utils/local-store";
 import Logo from '../assets/images/logo.png';
 import './app.global.less';
 
@@ -38,7 +38,7 @@ enum AuthenticationMethods {
     LOCAL = "local"
 };
 
-const sessionStorage = new SessionStore();
+const localStorage = new LocalStore();
 const AuthenticationMethodsKey = "authentication_method";
 
 export const App = ({...props}) => {
@@ -55,7 +55,7 @@ export const App = ({...props}) => {
         (async () => {
             if (state?.username) {
 
-                await sessionStorage.setData("sign-in-init", "true");
+                await localStorage.setData("sign-in-init", "true");
 
                 httpRequest({
                     method: "GET",
@@ -72,7 +72,7 @@ export const App = ({...props}) => {
 
     useEffect(() => {
         (async () => {
-            const isSingInInit = await sessionStorage.getData("sign-in-init");
+            const isSingInInit = await localStorage.getData("sign-in-init");
 
             if (isSingInInit === "true") {
                 signIn();
@@ -82,7 +82,7 @@ export const App = ({...props}) => {
 
     useEffect(() => {
         (async () => {
-            let persistedAuthenticationMethod = await sessionStorage.getData(AuthenticationMethodsKey);
+            let persistedAuthenticationMethod = await localStorage.getData(AuthenticationMethodsKey);
 
             if (persistedAuthenticationMethod !== "") {
                 setAuthenticationMethod(persistedAuthenticationMethod as AuthenticationMethods);
@@ -99,13 +99,13 @@ export const App = ({...props}) => {
 
     const handleAuthenticationMethodToggle = useCallback(async () => {
         if (authenticationMethodToggleStatus === true) {
-            await sessionStorage.setData(AuthenticationMethodsKey, AuthenticationMethods.ASGARDEO).then(() => {
+            await localStorage.setData(AuthenticationMethodsKey, AuthenticationMethods.ASGARDEO).then(() => {
                 setAuthenticationMethod(AuthenticationMethods.ASGARDEO);
                 setAuthenticationMethodToggleStatus(false);
             });
         }
         else {
-            await sessionStorage.setData(AuthenticationMethodsKey, AuthenticationMethods.LOCAL).then(() => {
+            await localStorage.setData(AuthenticationMethodsKey, AuthenticationMethods.LOCAL).then(() => {
                 setAuthenticationMethod(AuthenticationMethods.LOCAL);
                 setAuthenticationMethodToggleStatus(true);
             });
@@ -113,7 +113,7 @@ export const App = ({...props}) => {
     }, [authenticationMethodToggleStatus]);
 
     const handleAsgardeoSignOut = (): void => {
-        sessionStorage.removeData("sign-in-init");
+        localStorage.removeData("sign-in-init");
         signOut();
     }
 

@@ -46,6 +46,10 @@ export const LoginContent = (props: any) => {
 
     const { signIn } = useAuthContext();
 
+    const handleAsgardeoSignIn = () => {
+        signIn();
+    }
+
     return (
         <Content className="text-center">
             <FlexboxGrid justify="center" align="middle" className="middle-panel">
@@ -55,7 +59,9 @@ export const LoginContent = (props: any) => {
                     <Panel>
                         <img src={HomeImage} alt="Home page image" style={styles.imageStyles} />
                         <br /><br />
-                        <Button appearance="primary" onClick={ signIn } data-test-id="login-button">Login</Button>
+                        <Button appearance="primary" onClick={ handleAsgardeoSignIn } data-test-id="login-button">
+                            Login
+                        </Button>
                     </Panel>
                 </FlexboxGrid.Item>
             </FlexboxGrid>

@@ -53,7 +53,8 @@
                     signInRedirectURL: "http://localhost:3000/app", // Application Sign-In request handle URL
                     signOutRedirectURL: "http://localhost:3000/app", // Application Sign-out request handle URL
                     clientID: "", // Application register ID
-                    baseUrl: "", // Identity Provider Account Base Path
+                    baseUrl: "", // Identity Provider Account Base Path,
+                    allowedDomains: ["https://api.asgardeo.io"], // URL domains that will be call after authentication
                     scope: ["openid", "profile"]
                 });
 

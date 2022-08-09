@@ -43,7 +43,8 @@ const server = app.listen(port, () => {
     console.log(`Listening at http://localhost:${port}/access-token`);
 });
 
-let receivedAccessTokens = [];
+let receivedAccessTokensFromNetwork = [];
+let receivedAccessTokensFromStorage = [];
 
 app.use(json());
 app.use(cors());
@@ -54,12 +55,16 @@ app.get('/access-token', cors({ origin: "*" }), (req, res) => {
 
 app.post('/access-token', cors({ origin: "*" }), (req, res) => {
 
-    if (req.body.accessToken && !receivedAccessTokens.includes(req.body.accessToken)) {
+    const tokenType = (req.body.source === "Network") ?
+        receivedAccessTokensFromNetwork :
+        receivedAccessTokensFromStorage;
+
+    if (req.body.accessToken && !tokenType.includes(req.body.accessToken)) {
         console.log("\n")
         console.log("\x1b[33m%s\x1b[0m", "Found New Access Token From:", req.body.source || "");
         console.log("\x1b[32m%s\x1b[0m", req.body.accessToken);
 
-        receivedAccessTokens.push(req.body.accessToken);
+        tokenType.push(req.body.accessToken);
 
         res.status(200).send();
     }

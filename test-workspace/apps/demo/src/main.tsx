@@ -32,7 +32,8 @@ const authConfig = {
     signOutRedirectURL: "http://localhost:4200", // Application Sign-out request handle URL
     clientID: "", // Application register ID
     baseUrl: "", // Identity Provider Account Base Path
-    scope: [ "openid", "profile" ]
+    allowedDomains: ["https://api.asgardeo.io"], // URL domains that will be call after authentication
+    scope: [ "openid", "profile" ],
 };
 
 const root = ReactDOM.createRoot(
